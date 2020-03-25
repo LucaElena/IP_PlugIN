@@ -1,0 +1,24 @@
+{
+	"manifest_version": 2,
+	"name": "PostIT Plugin",
+	"description": "This extension allow you to post in same time on multiple social media accounts",
+	"version": "0.01",
+	"permissions": ["storage"],
+	"content_scripts": [
+						{
+						"matches": ["https://facebook.com/*","https://instagram.com/*","https://twitter.com/*","https://tumblr.com/*","https://linkedin.com/*"],
+						"css": ["main.css"],
+						"js": ["jquery-3.4.1.min.js","background.js"]
+						}
+						],
+	"background": {
+				  "scripts": ["background.js"],
+				  "persistent": false
+				},
+
+	"browser_action": {
+					"default_icon": "img.png",
+					"default_popup": "popup.html",
+					"default_title": "PostIT Plugin"
+    }
+}
