@@ -1,19 +1,37 @@
-.social_on {
-    width: 30px;
-    height: 30px;
-  }
-      
-.social_on svg {
-    width: 30px;
-    height: 30px;
+.social_icon
+{
+    width: 25px;
+    height: 25px;
+ }
+.flex-container {
+  display: flex;
+  flex-wrap: nowrap;}
+.flex-container > div {
+  width: 200px;
+  margin: 10px;
+  text-align: center;
+  line-height: 25px;
+  font-size: 15px;
 }
-
-.social_btn {
-    width: 30px;
-    height: 30px;
-  }
-      
-.social_btn svg {
-    width: 30px;
-    height: 30px;
-}
+/* .social_on_div  */
+/* { */
+	/* width: 25px; */
+	/* height: 25px; */
+/* } */
+/* body */
+/* .main_div */
+/* .social_on_div */
+/* { */
+	/* height: 65px; */
+	/* border-bottom: 0; */
+/* } */
+/* body * { */
+  /* box-sizing: inherit; */
+/* } */
+/* body  */
+/* .main_class */
+/* .social_btn */
+/* { */
+	/* height: 65px; */
+	/* border-bottom: 0; */
+/* } */

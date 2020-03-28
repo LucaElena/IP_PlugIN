@@ -1,52 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
     <meta charset="utf-8">
     <title>PostIT</title>
-    <!--script src="https://kit.fontawesome.com/82b05c8bca.js" crossorigin="anonymous"></script-->
     <link rel="stylesheet" href="main.css">
+	<script defer src="popup.js" type="text/javascript" ></script>
+	
 </head>
 
-<body >
+<body class="all">
 <div class="main_div">
-    <div class="social_on" style="text-align:center;">  
-		
-        <p> You are curently on : </p> 
-        <img src ="D:\IP\IP_Proiect2\instagram1.png" class="so_instagram" height="65">
-		    
-        
-    </div>
-    <form action="/action_page.php">
-    <div style="text-align:center;">  
-        <p align=center>You may also want to share your post here:</p>
 
-        <img src ="D:\IP\IP_Proiect2\instagram1.png" class="instagram" height="65">
-            
-        <input type="radio" id="facebook" name="tip" value="facebook">
-        
-        <img src ="D:\IP\IP_Proiect2\Twitter1.jpg" class="twitter" height="65">
-        
-        <input type="radio" id="twitter" name="tip" value="twitter">
+		<div align=center id="social_on_div"></div> <!-- container 1: were we are curently-->
 		
-        <img src ="D:\IP\IP_Proiect2\in1.png" class="linkedin" height="65">
-        <input type="radio" id="linkedin" name="tip" value="linkedin">
-		
-    
-        <img src ="D:\IP\IP_Proiect2\facebook1.png" class="linkedin" height="65">
-        <input type="radio" id="facebook" name="tip" value="facebook">
-		
-        <img src ="D:\IP\IP_Proiect2\tumblr.jpg" class="tumblr" height="65">
-        <input type="radio" id="tumblr" name="tip" value="tumblr">
-		
-
-    </div>
-    <div style="text-align:center;">
-        <br>
-        <input class="postit_btn" type="submit" value="Post IT">
-    </div>
-    </form>
+		<form>
+        <div id="share_on_div" class="flex-container"></div> <!-- container 2: were we whant to share-->
+		<div align=center id="post_it_div"></div> <!-- container 3: were we put submit button-->
+		</form>
+  
 </div>
 </body>
 
