@@ -1,0 +1,17 @@
+.social_on {
+    width: 30px;
+    height: 30px;
+
+  }
+  body
+  .main_div
+  .social_on {
+    height: 65px;
+    border-bottom: 0;
+    background-color: #e84d3d;
+
+  }
+  body * {
+      box-sizing: inherit;
+  
+  }
