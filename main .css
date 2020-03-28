@@ -8,10 +8,16 @@
   .social_on {
     height: 65px;
     border-bottom: 0;
-    background-color: #e84d3d;
 
   }
   body * {
       box-sizing: inherit;
   
   }
+  body 
+  .main_class
+  .social.btn{
+    height: 65px;
+    border-bottom: 0;
+  }
+
