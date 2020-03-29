@@ -1,4 +1,4 @@
-body
+.body_all
 {
 	font-size: 15px;
 	width:100%;
@@ -10,22 +10,37 @@ body
 	margin: 0px;
 	padding: 5px;
 }
+
 .social_icon
 {
     width: 30px;
     height: 30px;
-	border-radius: 25px;
+	border-radius: 10px;
 	border: 0px;
 	margin: 0px;
 	padding: 0px;
- }
-.flex-container {
+}
+
+.flex-container
+{
   display: flex;
-  flex-wrap: nowrap;}
-.flex-container > div {
+  flex-wrap: nowrap;
+}
+
+.flex-container > div
+{
   width: 200px;
   margin: 10px;
   text-align: center;
-  line-height: 25px;
-  
+  line-height: 25px;  
+}
+
+
+
+.postit_btn 
+{
+	padding: 8px 16px;
+	color: #000;
+	border-radius: 5px;
+	font-size: 15px;
 }

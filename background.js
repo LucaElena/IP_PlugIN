@@ -8,46 +8,7 @@
 console.log('Background Chrome extension running!');
 
 
-// function buttonClicked(tab)
-// function buttonClicked()
-// {
-	// console.log(tab);
 
-// let params = {
-	// active: true,
-	// currentWindow: true
-// }
-// chrome.tabs.query(params , gotTabs);
-	
-// function gotTabs(tabs)
-// {
-
-	// let msg = {
-		// txt: "hello",
-		// url: tabs[0].url
-		
-		// }
-	// console.log('Popup current url is :' +tabs[0].url );
-	// chrome.tabs.sendMessage(tabs[0].id , msg);
-// }
-	
-// }
-// chrome.tabs.getCurrent(function callback)
-// chrome.runtime.onMessage.addListener(gotMessage);
-// function gotMessage(message, sender , sendResponse)
-// {
-	// console.log(message.txt);
-	// console.log("URL-ul current este : " + message.url);
-	// if(message.txt === "get_current_url")
-	// {
-		// let paragraphs = document.getElementsByTagName('p');
-		// for(elt of paragraphs)
-		// {
-			// elt.style['backgroundColor'] = '#FF00FF';
-		// }
-
-	// }
-// }
 
 
 

@@ -17,10 +17,11 @@ chrome.runtime.sendMessage({
 });
 
 chrome.runtime.onMessage.addListener(gotMessage);
+
 function gotMessage(message, sender , sendResponse)
 {
 	console.log(message.txt);
-	console.log("URL-ul current este : " + message.url);
+	console.log("URL-ul current este : " + message.data.url);
 
 	generete_popup_html(message.data.url);
 
@@ -44,32 +45,29 @@ function gotMessage(message, sender , sendResponse)
 function generete_popup_html(url)
 {
 	current_social_page = "page not included";
-	
-	if(url.includes("https://www.facebook.com")){current_social_page = "facebook"; }
-	if(url.includes("https://www.instagram.com")){current_social_page = "instagram"; }
-	if(url.includes("https://twitter.com")){current_social_page = "twitter"; }
-	if(url.includes("https://www.tumblr.com")){current_social_page = "tumblr"; }
-	if(url.includes("https://www.linkedin.com")){current_social_page = "linkedin"; }
-	
 	current_img = "";
 	
-	if (current_social_page === 'facebook') {current_img = img_facebook;}
-	if (current_social_page === 'instagram') {current_img = img_instagram;}
-	if (current_social_page === 'twitter') {current_img = img_twitter;}
-	if (current_social_page === 'tumblr') {current_img = img_tumblr;}
-	if (current_social_page === 'linkedin') {current_img = img_linkedin;}
+	if(url.includes("https://www.facebook.com")){current_social_page = "facebook"; current_img = img_facebook;}
+	if(url.includes("https://www.instagram.com")){current_social_page = "instagram"; current_img = img_instagram;}
+	if(url.includes("https://twitter.com")){current_social_page = "twitter"; current_img = img_twitter;}
+	if(url.includes("https://www.tumblr.com")){current_social_page = "tumblr"; current_img = img_tumblr;}
+	if(url.includes("https://www.linkedin.com")){current_social_page = "linkedin"; current_img = img_linkedin;}
 	
+
 		
 	if(current_social_page != "page not included")
 	{	
 		document.getElementById("social_on_div").innerHTML = '<p align=center>You are curently on: </p>' + current_img; 
 		document.getElementById("share_on_div").innerHTML = '<div><p align=center>You may also want to share your post here: </p>' + generete_share_on_html(current_social_page) +'</div>'; 
-		document.getElementById("post_it_div").innerHTML = '<input class="postit_btn" id="postit" type="submit" value="PostIT" >'; 
+		document.getElementById("post_it_div").innerHTML = '<input class="postit_btn" id="postit" type="submit" value="Post IT" >'; 
+		
+		document.getElementById("postit").addEventListener("click", postIt);
 	}
 	else
 	{
 		document.getElementById("social_on_div").innerHTML = "<p align=center>This page is not included in our extension. Sorry </p>"; 
 	}
+	
 }
 
 function generete_share_on_html(current_social_page)
@@ -99,4 +97,13 @@ function generete_share_on_html(current_social_page)
 	return my_share_on_html;
 	
 }
-		
+
+
+function postIt(tab)
+{
+	console.log('Button postIt clicked :' + tab.id);
+	//do stuff -> continue here
+	
+	//ends
+	window.close();
+}
