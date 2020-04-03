@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "PostIT Plugin",
 	"description": "This extension allow you to post in same time on multiple social media accounts",
-	"version": "0.1",
+	"version": "0.2",
 
 	"content_scripts": [
 						{

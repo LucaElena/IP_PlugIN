@@ -15,9 +15,9 @@ console.log('Background Chrome extension running!');
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
 		
-        if (request.msg === "give_me_current_url")
+        if (request.txt === "give_me_current_url")
 		{
-            console.log('Am primit intrebare :' + request.msg);
+            console.log('Am primit intrebare :' + request.txt);
            
 			/// find current tab url and send it 
 			let params = {
@@ -36,7 +36,7 @@ chrome.runtime.onMessage.addListener(
 				});
 			}
         }
-		if (request.msg === "current_url_received")
+		if (request.txt === "current_url_received")
 		{
 			console.log('Am primit intrebare : current_url_received -> do nothing');
 		}
