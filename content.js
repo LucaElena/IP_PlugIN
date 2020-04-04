@@ -17,10 +17,15 @@ function gotMessage(message, sender , sendResponse)
 								post_imgs: []
 							}
 							};
+	///Twitter - done
+	///Linkedin - done with minor bugs
+	///Facebook - done with some bugs
+	///Instagram - not working
+	///Tumblr - not working - content is inside a script/container
 	// Extract post data from different social platforms:
 	// This tested and is working with some problems: Facebook 
-	// Problem : image is small 100x100 px
-	// Test on other pc
+	// Problem : image is small 100x100 px -> same problem
+	// Test on other pc -> work 
 	if(message.txt === "give_me_current_postdata_facebook")
 	{
 		let divs = document.getElementsByTagName('div');
@@ -47,9 +52,10 @@ function gotMessage(message, sender , sendResponse)
 		}
 		console.log('divs numbers = ' +divs.length);
 	}
-	// This tested and is working with some problems: Instagram
-	// Problem : You could post only from mobile on instgram -> simulate mobile CTRL + SHIFT + M in console and change www with m in URL if not change automaticaly
-	// Test on other pc
+	// This tested and is working with some problems on develop pc: Instagram
+	// Problem 1: You could post only from mobile on instgram -> simulate mobile CTRL + SHIFT + M in console and change www with m in URL if not change automaticaly
+	// Problem 2: Story or Image post 
+	// Test on other pc -> not working
 	if(message.txt === "give_me_current_postdata_instagram")
 	{
 		let divs = document.getElementsByTagName('div');
@@ -94,6 +100,31 @@ function gotMessage(message, sender , sendResponse)
 				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
 			}
 		}
+	}
+	// This tested and is working: Tumblr 
+	// Test on other pc
+	if(message.txt.includes("give_me_current_postdata_tumblr"))
+	{
+		let divs = document.getElementsByTagName('div');
+		for(var i = divs.length - 1; i >= 0; i--)
+		{
+			if(divs[i].className.includes("glass-container"))
+			{
+				current_postdata.txt = "current_postdata_defined_tumblr";
+				current_postdata.data.post_text = divs[i].textContent;
+				console.log('Found tumblr post text='+ divs[i].textContent + ' className' + divs[i].className);
+
+			}
+			if(divs[i].className == "photoset")
+			{
+				console.log('Found tumblr post image='+ divs[i].src);
+				current_postdata.txt = "current_postdata_defined_tumblr";
+				current_postdata.data.post_imgs.push( divs[i].src);
+			}
+		}
+		// current_postdata.txt = "current_postdata_defined_tumblr";
+		// current_postdata.data.post_text = "Hello";
+		console.log('divs numbers = ' +divs.length);
 	}
 	// This tested and is working: Linkedin 
 	// Test on other pc
