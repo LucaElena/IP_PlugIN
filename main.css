@@ -48,10 +48,45 @@
 
 
 
-.postit_btn 
+.general_class_btn
 {
-	padding: 8px 16px;
-	color: #000;
-	border-radius: 5px;
+	padding: 8px 13px;
+	background-color: #3b5998;
+	color: white;
+	border-radius: 1px;
 	font-size: 15px;
+	border: 1px blue; /* Blue border */
+	width: 100%;
 }
+.general_class_btn:hover {
+  background-color: #0e76a8;
+}
+
+.meniu-group input {
+  background-color: #3b5998; /* Blue background */
+  border: 1px blue; /* Blue border */
+  color: white; /* White text */
+  padding: 8px 13px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
+  font-size: 15px;
+  width: 50%;
+  
+}
+
+/* Clear floats (clearfix hack) */
+.meniu-group:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.meniu-group input:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.meniu-group input:hover {
+  background-color: #0e76a8;
+}
+
