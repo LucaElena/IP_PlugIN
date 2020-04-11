@@ -36,6 +36,15 @@ chrome.runtime.onMessage.addListener(
 				});
 			}
         }
+		if (request.txt === "open_auth_url")
+		{
+            console.log('Am primit intrebare :' + request.txt);
+
+			chrome.tabs.create({ url: request.data.url });
+
+           
+
+        }
 		if (request.txt === "current_url_received")
 		{
 			console.log('Am primit intrebare : current_url_received -> do nothing');

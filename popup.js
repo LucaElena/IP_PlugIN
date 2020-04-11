@@ -253,14 +253,14 @@ function send_register_data()
     if (xhttp.status == 201) 
 	{
         // parse JSON data
-        console.log(JSON.parse(xhttp.response));
+        console.log(xhttp.response);
 		// do stuff here after register
 		send_login_data( email , password , 'registered');
 		//
     }
 	else 
 	{
-        console.error('Error!'+JSON.parse(xhttp.response));
+        console.error('Error!'+xhttp.response);
     }
 };
 }
@@ -326,38 +326,93 @@ function send_login_data( email, password , form )
 
 function authorize_fct()
 {
-	// document.getElementById("authorize_div").innerHTML = 
-	// '<input type="submit" id="authorize_request_btn_fb" class="authorize_request_class" name="facebook" value="Authorize Facebook(not done)">'+
-	// '<input type="submit" id="authorize_request_btn_in" class="authorize_request_class" name="instagram" value="Authorize Instagram(not done">'+
-	// '<input type="submit" id="authorize_request_btn_tu" class="authorize_request_class" name="tumblr" value="Authorize Tumblr(not done)">'+
-	// '<input type="submit" id="authorize_request_btn_tw" class="authorize_request_class" name="twitter" value="Authorize Twitter(not done)">'+
-	// '<input type="submit" id="authorize_request_btn_li" class="authorize_request_class" name="linkedin" value="Authorize Linkedin(not done)">';
+	document.getElementById("authorize_div").innerHTML = 
+	'<input type="submit" id="authorize_request_btn_fb" class="authorize_request_class" name="facebook" value="Authorize Facebook(not done)">'+
+	'<input type="submit" id="authorize_request_btn_in" class="authorize_request_class" name="instagram" value="Authorize Instagram(not done">'+
+	'<input type="submit" id="authorize_request_btn_tu" class="authorize_request_class" name="tumblr" value="Authorize Tumblr">'+
+	'<input type="submit" id="authorize_request_btn_tw" class="authorize_request_class" name="twitter" value="Authorize Twitter">'+
+	'<input type="submit" id="authorize_request_btn_li" class="authorize_request_class" name="linkedin" value="Authorize Linkedin">';
 	
 
 
-	// document.getElementById("authorize_request_btn_fb").addEventListener("click", function() {authorize_request("facebook");});
-	// document.getElementById("authorize_request_btn_in").addEventListener("click", function() {authorize_request("instagram");});
-	// document.getElementById("authorize_request_btn_tu").addEventListener("click", function() {authorize_request("tumblr");});
-	// document.getElementById("authorize_request_btn_tw").addEventListener("click", function() {authorize_request("twitter");});
-	// document.getElementById("authorize_request_btn_li").addEventListener("click",  function() {authorize_request("linkedin");});
+	document.getElementById("authorize_request_btn_fb").addEventListener("click", function() {authorize_request("facebook");});
+	document.getElementById("authorize_request_btn_in").addEventListener("click", function() {authorize_request("instagram");});
+	document.getElementById("authorize_request_btn_tu").addEventListener("click", function() {authorize_request("tumblr");});
+	document.getElementById("authorize_request_btn_tw").addEventListener("click", function() {authorize_request("twitter");});
+	document.getElementById("authorize_request_btn_li").addEventListener("click",  function() {authorize_request("linkedin");});
 
-	document.getElementById("authorize_div").innerHTML = 
+	// document.getElementById("authorize_div").innerHTML = 
 	// '<form action="http://sma-a4.herokuapp.com/twitter/profile"><input type="submit" value="Authorize Twitter(not done)" /></form>';
-	'<a href="http://sma-a4.herokuapp.com/twitter/profile">Authorize Twitter</a>';
+	// '<a href="http://sma-a4.herokuapp.com/twitter/auth">Authorize Twitter</a>';
 }
 
 
 function authorize_request(clicked_platform)
 {
 	
-	console.log('Button authorize_request_btn clicked for '+ clicked_platform);
+	console.log('Button authorize_request_btn clicked for \"'+ clicked_platform+'\"');
 	
 	var xhttp = new XMLHttpRequest();
-	xhttp.open("POST", "http://sma-a4.herokuapp.com/"+clicked_platform+"/profile", true);
-	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhttp.send('name='+name+'&email='+email+'&password='+password);
+	check_profile_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/profile";
+	check_auth_url = "https://sma-a4.herokuapp.com/"+clicked_platform+"/auth";
+	xhttp.open("GET", check_profile_url, true );
+	xhttp.withCredentials = true;
+	xhttp.send();
+	
+	xhttp.onload = () => {
+		if (xhttp.status == 401) // success but not yet authorized
+		{
+			// parse JSON data
+			console.log("401 =");
+			console.log(xhttp.response);
+
+			chrome.runtime.sendMessage({
+				txt: "open_auth_url", 
+				data: {
+					subject: "Open auth link in new tab",
+					url: check_auth_url
+				}
+			});
+			// var xhttp2 = new XMLHttpRequest();
+			// check_profile_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/auth";
+			// xhttp2.open("GET", check_profile_url, true );
+			// xhttp2.withCredentials = true;
+			// xhttp2.send();
+			
+			// xhttp2.onload = () => {
+			// if (xhttp2.status == 200) // success but not yet authorized
+			// {
+				// console.log("200 =");
+				// console.log(xhttp2.response);
+			// }
+			// };
+			
+			// console.log(xhttp.getResponseHeader('Set-Cookie'));
+			
+				// chrome.storage.local.set({'email': email});
+				// chrome.storage.local.set({'password': password});
+				// chrome.storage.local.set({'logged': true});
+				// console.log('We save data email = ' + email +' logged '+ true);
+				// clear_html_containers();
+				// generete_popup_html( url);
+			//
+		}
+		else
+		{
+			if (xhttp.status == 403) //not autheficated yet . probably cookie missing
+			{
+				console.log("403 =");
+				console.log(xhttp.response);
+			}
+			else
+			{	
+				console.error('Error!');
+			}
+		}
+	};
 	//post data on al selected social platforms
 	document.getElementById("authorize_div").innerHTML = '';
+	
 }
 
 
