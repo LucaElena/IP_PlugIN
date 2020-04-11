@@ -56,7 +56,7 @@
 	border-radius: 1px;
 	font-size: 15px;
 	border: 1px blue; /* Blue border */
-	width: 100%;
+	/* width: 100%; */
 }
 .general_class_btn:hover {
   background-color: #0e76a8;
@@ -71,6 +71,8 @@
   float: left; /* Float the buttons side by side */
   font-size: 15px;
   width: 50%;
+  white-space: normal;
+
   
 }
 
