@@ -14,7 +14,8 @@ function gotMessage(message, sender , sendResponse)
 							txt: "current_postdata_notdefined", 
 							data: {
 								post_text: "",
-								post_imgs: []
+								post_imgs: [],
+								post_videos: []
 							}
 							};
 	///Twitter - done
@@ -45,8 +46,15 @@ function gotMessage(message, sender , sendResponse)
 			if(divs[i].className == "_jfc")
 			{
 				console.log('Found facebook post img='+ divs[i].getElementsByTagName('img')[0].src);
-				current_postdata.txt = "current_postdata_defined_twitter";
+				current_postdata.txt = "current_postdata_defined_facebook";
 				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+			}
+			//extract video from post
+			if(divs[i].className == "cauta clasa care trebuie")
+			{
+				console.log('Found facebook post video='+ divs[i].getElementsByTagName('video')[0].src);
+				current_postdata.txt = "current_postdata_defined_facebook";
+				current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
 			}
 			
 		}
@@ -99,6 +107,12 @@ function gotMessage(message, sender , sendResponse)
 				current_postdata.txt = "current_postdata_defined_twitter";
 				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
 			}
+			if(divs[i].className == "cauta clasa care trebuie")
+			{
+				console.log('Found twitter post video='+ divs[i].getElementsByTagName('video')[0].src);
+				current_postdata.txt = "current_postdata_defined_twitter";
+				current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
+			}
 		}
 	}
 	// This tested and is working: Tumblr 
@@ -144,6 +158,12 @@ function gotMessage(message, sender , sendResponse)
 				console.log('Found linkedin post image='+ divs[i].getElementsByTagName('img')[0].src);
 				current_postdata.txt = "current_postdata_defined_linkedin";
 				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+			}
+			if(divs[i].className == "cauta clasa care trebuie")
+			{
+				console.log('Found linkedin post video='+ divs[i].getElementsByTagName('video')[0].src);
+				current_postdata.txt = "current_postdata_defined_linkedin";
+				current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
 			}
 		}
 

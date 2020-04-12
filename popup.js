@@ -12,7 +12,6 @@ img_facebook = '<object class="social_icon" type="image/svg+xml" data="facebook.
 logged = false;
 email = "not_logged";
 password = "";
-cookie = "";//i don't know if we need it -> is http only -> probably is not possible 
 url = "not_defined"
 
 	// console.log('We deleted stored user data');
@@ -20,11 +19,6 @@ url = "not_defined"
 	// chrome.storage.local.set({'password': ""});
 	// chrome.storage.local.set({'logged': false});
 
-// chrome.storage.local.get(['logged', 'email'], function(data) {
-    // logged = data.logged;
-    // email = data.email;
-	// console.log('we currently have saved data: ' + logged + " " + email);
-// });
 
 
 chrome.runtime.sendMessage({
@@ -42,16 +36,8 @@ function gotMessage(message, sender , sendResponse)
 	console.log(message.txt);
 	console.log("URL-ul current este : " + message.data.url);
 	url = message.data.url;
-	generete_popup_html(message.data.url , sendResponse );
+	generete_popup_html(url );
 
-
-	// chrome.runtime.sendMessage({
-	// txt: "current_url_received", 
-	// data: {
-		// subject: "Received Current URL",
-		// content: "Thank you"
-	// }
-	// });
 }
 
 
@@ -70,9 +56,12 @@ function generete_popup_html( url)
 	
 	let social_pages_included = ['facebook', 'instagram', 'twitter', 'tumblr', 'linkedin'];
 	
-	chrome.storage.local.get(['logged', 'email' , 'email'], function(data){
+	
+	chrome.storage.local.get(['logged', 'email' , 'password'], function(data){
 		logged = data.logged;
 		email = data.email;
+		password = data.password;
+		
 		console.log('we currently have saved data: ' + logged + " " + email);
 
 		if(logged  == false)
@@ -83,13 +72,14 @@ function generete_popup_html( url)
 			
 			document.getElementById("register_btn").addEventListener("click", register_fct);
 			document.getElementById("login_btn").addEventListener("click", login_fct);
+			
 			document.getElementById("social_on_div").innerHTML = "<p align=center>Please register/login first.Sorry </p>"; 
 			
 		}
 		else
 		{
 			document.getElementById("meniu_div").innerHTML = 
-			'<input class="meniu_button" id="logout_btn" type="submit" value="Log Out ' + email.substr(0, email.indexOf('@')) +'" >'+
+			'<input class="meniu_button" id="logout_btn" type="submit" value="Log Out ' + email.substr(0, email.indexOf('@')) + '" >'+
 			'<input class="meniu_button" id="authorize_btn" type="submit" value="Authorize post" >';
 			
 			document.getElementById("logout_btn").addEventListener("click", logout_fct);
@@ -98,7 +88,6 @@ function generete_popup_html( url)
 			if(current_social_page != "page not included")
 			{
 				 
-				document.getElementById("social_on_div").innerHTML = '<p align=center>Currently on: </p>' + current_img; 
 				document.getElementById("social_on_div").innerHTML = '<p align=center>Currently on: </p>' + current_img; 
 				document.getElementById("share_on_div").innerHTML = '<div><p align=center>You may also want to share your post here: </p>' + generete_share_on_html(current_social_page) +'</div>'; 
 				document.getElementById("post_it_div").innerHTML = '<input class="general_class_btn" id="postit_btn" type="submit" value="Post IT" >'; 
@@ -121,16 +110,25 @@ function generete_popup_html( url)
 					console.log(" We recevead current post message: " + message.txt);
 					if (message.txt != "current_postdata_notdefined")
 					{
+						document.getElementById("you_want_to_share_media_div").innerHTML = '';
 						if(message.data.post_text != "")
 						{
 							document.getElementById("you_want_to_share_txt_div").innerHTML = '<p align=center>Text:</br>\"' + message.data.post_text + '\" </p>'; 
 						}
 						if(message.data.post_imgs != "")
 						{
-							document.getElementById("you_want_to_share_media_div").innerHTML = '<p align=center>Image(s): </p>'; 
+							document.getElementById("you_want_to_share_media_div").innerHTML += '<p align=center>Image(s): </p>'; 
 							for (var i = 0; i < message.data.post_imgs.length; i++)
 							{
 								document.getElementById("you_want_to_share_media_div").innerHTML +='<img src=' + message.data.post_imgs[i] + ' class="share_img">' ; 
+							}
+						}
+						if(message.data.post_videos != "")
+						{
+							document.getElementById("you_want_to_share_media_div").innerHTML += '<p align=center>Video(s): </p>'; 
+							for (var i = 0; i < message.data.post_videos.length; i++)
+							{
+								document.getElementById("you_want_to_share_media_div").innerHTML +='<video src=' + message.data.post_videos[i] + ' class="share_video">' ; 
 							}
 						}
 					}
@@ -164,9 +162,7 @@ function generete_share_on_html(current_social_page)
 		{
 			//generete dinamicaly the buttons only if we need them 
 			my_input = "";
-			// my_button = '<button class="social_btn_'+ social_pages[key] +'" for=" '+ social_pages[key] + '">';
-			// my_button = '<button class="social_btn" for=" '+ social_pages[key] + '">';
-			// my_button = '<button class="social_btn" for=" '+ social_pages[key] + '">';
+			
 			if (social_pages[key] === 'facebook') {my_input = img_facebook;}
 			if (social_pages[key] === 'instagram') {my_input = img_instagram;}
 			if (social_pages[key] === 'twitter') {my_input = img_twitter;}
@@ -292,6 +288,7 @@ function send_login_data( email, password , form )
 		email = document.getElementById("email_login").value;
 		password = document.getElementById("password_login").value;
 	}
+	
 	document.getElementById("login_div").innerHTML = '';
 	
 	console.log('Login email to post '+ email);
@@ -304,7 +301,8 @@ function send_login_data( email, password , form )
 	
 	xhttp.onload = () => {
     // process response
-    if (xhttp.status == 200) {
+    if (xhttp.status == 200)
+	{
         // parse JSON data
         console.log(JSON.parse(xhttp.response));
         // console.log(xhttp.getResponseHeader('Set-Cookie'));
@@ -312,6 +310,7 @@ function send_login_data( email, password , form )
 			chrome.storage.local.set({'email': email});
 			chrome.storage.local.set({'password': password});
 			chrome.storage.local.set({'logged': true});
+			
 			console.log('We save data email = ' + email +' logged '+ true);
 			clear_html_containers();
 			generete_popup_html( url);
