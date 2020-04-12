@@ -330,7 +330,8 @@ function authorize_fct()
 	'<input type="submit" id="authorize_request_btn_in" class="authorize_request_class" name="instagram" value="Authorize Instagram(not done">'+
 	'<input type="submit" id="authorize_request_btn_tu" class="authorize_request_class" name="tumblr" value="Authorize Tumblr">'+
 	'<input type="submit" id="authorize_request_btn_tw" class="authorize_request_class" name="twitter" value="Authorize Twitter">'+
-	'<input type="submit" id="authorize_request_btn_li" class="authorize_request_class" name="linkedin" value="Authorize Linkedin">';
+	'<input type="submit" id="authorize_request_btn_li" class="authorize_request_class" name="linkedin" value="Authorize Linkedin">'+
+	'<input type="submit" id="close_authorize_btn" class="general_class_btn" name="close_authorize" value="Close Authorize">';
 	
 
 
@@ -339,12 +340,17 @@ function authorize_fct()
 	document.getElementById("authorize_request_btn_tu").addEventListener("click", function() {authorize_request("tumblr");});
 	document.getElementById("authorize_request_btn_tw").addEventListener("click", function() {authorize_request("twitter");});
 	document.getElementById("authorize_request_btn_li").addEventListener("click",  function() {authorize_request("linkedin");});
+	document.getElementById("close_authorize_btn").addEventListener("click", close_authorize_fct);
 
 	// document.getElementById("authorize_div").innerHTML = 
 	// '<form action="http://sma-a4.herokuapp.com/twitter/profile"><input type="submit" value="Authorize Twitter(not done)" /></form>';
 	// '<a href="http://sma-a4.herokuapp.com/twitter/auth">Authorize Twitter</a>';
 }
 
+function close_authorize_fct()
+{
+	document.getElementById("authorize_div").innerHTML = '';
+}
 
 function authorize_request(clicked_platform)
 {
