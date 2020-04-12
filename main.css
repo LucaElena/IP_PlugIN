@@ -71,6 +71,15 @@
   background-color: #0e76a8;
 }
 
+.authorize_request_class
+{
+	padding: 8px 13px;
+	border-radius: 1px;
+	font-size: 10px;
+	width: 100%;
+}
+
+
 .meniu-group input {
   background-color: #3b5998; /* Blue background */
   border: 1px blue; /* Blue border */
