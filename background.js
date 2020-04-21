@@ -42,9 +42,12 @@ chrome.runtime.onMessage.addListener(
 
 			chrome.tabs.create({ url: request.data.url });
 
-           
-
         }
+		// error with port closed
+		// setTimeout(function()
+		// {
+			// sendResponse({status: true});
+		// }, 1);
 	}
 );
 

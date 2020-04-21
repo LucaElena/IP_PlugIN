@@ -48,18 +48,24 @@ function gotMessage(message, sender , sendResponse)
 			//extract img from post 
 			if(divs[i].className == "_jfc")
 			{
-				console.log('Found facebook post img='+ divs[i].getElementsByTagName('img')[0].src);
-				current_postdata.txt = "current_postdata_defined_facebook";
-				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+				if(divs[i].getElementsByTagName('img').length  != 0)
+				{
+					console.log('Found facebook post img='+ divs[i].getElementsByTagName('img')[0].src);
+					current_postdata.txt = "current_postdata_defined_facebook";
+					current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+				}
 			}
 			//extract video from post
-			if(divs[i].className == "cauta clasa care trebuie")
+			//extract video from post
+			if(divs[i].className == "_33by _33by _5f0d")
 			{
-				console.log('Found facebook post video='+ divs[i].getElementsByTagName('video')[0].src);
-				current_postdata.txt = "current_postdata_defined_facebook";
-				current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
+				if(divs[i].getElementsByTagName('img').length  != 0)
+				{
+					console.log('Found facebook post video='+ divs[i].getElementsByTagName('img')[0].src);
+					current_postdata.txt = "current_postdata_defined_facebook";
+					current_postdata.data.post_videos.push( divs[i].getElementsByTagName('img')[0].src);
+				}
 			}
-			
 		}
 		console.log('divs numbers = ' +divs.length);
 	}
@@ -67,30 +73,36 @@ function gotMessage(message, sender , sendResponse)
 	// Problem 1: You could post only from mobile on instgram -> simulate mobile CTRL + SHIFT + M in console and change www with m in URL if not change automaticaly
 	// Problem 2: Story or Image post 
 	// Test on other pc -> not working
-	if(message.txt === "give_me_current_postdata_instagram")
-	{
-		let divs = document.getElementsByTagName('div');
-		for(var i = divs.length - 1; i >= 0; i--)
-		{
-			var div = divs[i];
-			if(divs[i].className == "_1mf _1mj")
-			{
+	// if(message.txt === "give_me_current_postdata_instagram")
+	// {
+		// let divs = document.getElementsByTagName('div');
+		// for(var i = divs.length - 1; i >= 0; i--)
+		// {
+			// var div = divs[i];
+			// if(divs[i].className == "_1mf _1mj")
+			// {
 
-				console.log('Found instagram post text='+ divs[i].textContent);
-				current_postdata.txt = "current_postdata_defined_instagram";
-				current_postdata.data.post_text = divs[i].textContent;
+				// console.log('Found instagram post text='+ divs[i].textContent);
+				// current_postdata.txt = "current_postdata_defined_instagram";
+				// current_postdata.data.post_text = divs[i].textContent;
 
-			}
-			if(divs[i].className == "_jfc")
-			{
-				console.log('Found instagram post img='+ divs[i].getElementsByTagName('img')[0].src);
-				current_postdata.txt = "current_postdata_defined_instagram";
-				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
-			}
+			// }
+			// if(divs[i].className == "_jfc")
+			// {
+				// console.log('Found instagram post img='+ divs[i].getElementsByTagName('img')[0].src);
+				// current_postdata.txt = "current_postdata_defined_instagram";
+				// current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+			// }
+			// if(divs[i].className == "xDbR6")
+			// {
+				// console.log('Found instagram post video='+ divs[i].getElementsByTagName('video')[0].src);
+				// current_postdata.txt = "current_postdata_defined_instagram";
+				// current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
+			// }
 			
-		}
-		console.log('divs numbers = ' +divs.length);
-	}
+		// }
+		// console.log('divs numbers = ' +divs.length);
+	// }
 	// Not done yet -> TO DO ALEX
 	//Search div class for text and extract text
 	//Search div class for images and extract url with images
@@ -111,15 +123,21 @@ function gotMessage(message, sender , sendResponse)
 			}
 			if(divs[i].className == "_jfc")
 			{
-				console.log('Found flickr post img='+ divs[i].getElementsByTagName('img')[0].src);
-				current_postdata.txt = "current_postdata_defined_flickr";
-				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+				if(divs[i].getElementsByTagName('img').length  != 0)
+				{
+					console.log('Found flickr post img='+ divs[i].getElementsByTagName('img')[0].src);
+					current_postdata.txt = "current_postdata_defined_flickr";
+					current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+				}
 			}
 			if(divs[i].className == "_jfc")
 			{
-				console.log('Found flickr post video='+ divs[i].getElementsByTagName('video')[0].src);
-				current_postdata.txt = "current_postdata_defined_flickr";
-				current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
+				if(divs[i].getElementsByTagName('video').length  != 0)
+				{
+					console.log('Found flickr post video='+ divs[i].getElementsByTagName('video')[0].src);
+					current_postdata.txt = "current_postdata_defined_flickr";
+					current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
+				}
 			}
 			
 		}
@@ -129,6 +147,7 @@ function gotMessage(message, sender , sendResponse)
 	// Test on other pc
 	if(message.txt === "give_me_current_postdata_twitter")
 	{
+		console.log('Search data for twitter');
 		let divs = document.getElementsByTagName('div');
 		for(var i = divs.length - 1; i >= 0; i--)
 		{
@@ -140,42 +159,127 @@ function gotMessage(message, sender , sendResponse)
 			}
 			if(divs[i].className == "css-1dbjc4n r-1adg3ll r-1mlwlqe r-1pi2tsx r-1udh08x r-13qz1uu r-417010")
 			{
-				console.log('Found twitter post image='+ divs[i].getElementsByTagName('img')[0].src);
-				current_postdata.txt = "current_postdata_defined_twitter";
-				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+				if(divs[i].getElementsByTagName('img').length  != 0)
+				{
+					console.log('Found twitter post image='+ divs[i].getElementsByTagName('img')[0].src);
+					current_postdata.txt = "current_postdata_defined_twitter";
+					current_postdata.data.post_imgs.push(divs[i].getElementsByTagName('img')[0].src);
+				}
 			}
-			if(divs[i].className == "cauta clasa care trebuie")
+			if(divs[i].className == "css-1dbjc4n r-t23y2h r-1loqt21 r-1iusvr4 r-16y2uox r-1udh08x r-13tjlyg r-11iat2r r-1ftll1t")
 			{
-				console.log('Found twitter post video='+ divs[i].getElementsByTagName('video')[0].src);
-				current_postdata.txt = "current_postdata_defined_twitter";
-				current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
+				if(divs[i].getElementsByTagName('source').length  != 0)
+				{
+					console.log('Found twitter post video='+ divs[i].getElementsByTagName('source')[0].src);
+					current_postdata.txt = "current_postdata_defined_twitter";
+					current_postdata.data.post_videos.push( divs[i].getElementsByTagName('source')[0].src);
+				}
 			}
 		}
 	}
-	// This tested and is working: Tumblr 
-	// Test on other pc
-	if(message.txt.includes("give_me_current_postdata_tumblr"))
-	{
-		let divs = document.getElementsByTagName('div');
-		for(var i = divs.length - 1; i >= 0; i--)
-		{
-			if(divs[i].className.includes("glass-container"))
-			{
-				current_postdata.txt = "current_postdata_defined_tumblr";
-				current_postdata.data.post_text = divs[i].textContent;
-				console.log('Found tumblr post text='+ divs[i].textContent + ' className' + divs[i].className);
+	// This is not working yet 
 
-			}
-			if(divs[i].className == "photoset")
+	if(message.txt.includes("give_me_current_postdata_tumblr"))
+	{	
+		console.log('Search data for tumblr');
+		
+		let tumblr_text_post = {
+								title: "not_defined", 
+								txt: "not_defined", 
+								tags: ""
+							};
+							
+		let iframe = document.getElementsByClassName('_2TcTp');
+		
+		if(iframe.length != 0)
+		{
+			var iframeDocument = iframe[0].contentDocument || iframe[0].contentWindow.document;
+			
+			let divs = iframeDocument.getElementsByTagName('div');
+			for(var i = 0; i <= divs.length - 1; i++)
 			{
-				console.log('Found tumblr post image='+ divs[i].src);
-				current_postdata.txt = "current_postdata_defined_tumblr";
-				current_postdata.data.post_imgs.push( divs[i].src);
+				//Post text title
+				
+				if(divs[i].className == "editor editor-plaintext has-text")
+				{
+					current_postdata.txt = "current_postdata_defined_tumblr";
+					tumblr_text_post.title = divs[i].textContent;
+					console.log('Found tumblr post text title='+ divs[i].textContent);
+
+				}
+				//Post text body
+				if(divs[i].className == "editor editor-richtext")
+				{
+					current_postdata.txt = "current_postdata_defined_tumblr";
+					tumblr_text_post.txt = divs[i].textContent;
+					console.log('Found tumblr post text='+ divs[i].textContent);
+
+				}
+				//Post text tags
+				if(divs[i].className == "post-form--tag-editor")
+				{
+					current_postdata.txt = "current_postdata_defined_tumblr";
+					let spans = divs[i].getElementsByClassName('tag-label');
+					for(var j = 0; j <= spans.length - 1; j++)
+					{
+						tumblr_text_post.tags += '#'+spans[j].textContent+' ';
+						console.log('Found tumblr post text tag='+ spans[j].textContent);
+					}
+				}
+				//Post images
+				if(divs[i].className == "photoset--image-wrap")
+				{
+					style = window.getComputedStyle(divs[i], false);
+					bi = style.backgroundImage.slice(4, -1).replace(/"/g, "");
+					console.log('Found tumblr post image='+ bi);
+					current_postdata.txt = "current_postdata_defined_tumblr";
+					current_postdata.data.post_imgs.push( bi);
+				}
+				//Post videos
+				if(divs[i].className == "crt-video crt-skin-default vjs-paused vjs_video_3-dimensions vjs-controls-enabled vjs-workinghover vjs-user-inactive")
+				{
+					if(divs[i].getElementsByTagName('video').length != 0)
+					{
+						console.log('Found tumblr post video='+ divs[i].getElementsByTagName('video')[0].src);
+						current_postdata.txt = "current_postdata_defined_tumblr";
+						current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
+					}
+				}
+				//Post videos
+				// if(divs[i].className == "video-preview")
+				if(divs[i].className == "editor editor-plaintext")
+				{
+					// if(divs[i].getElementsByTagName('iframe').length != 0)
+					// {
+						// console.log('Found tumblr post video='+ divs[i].getElementsByTagName('iframe')[0].src);
+						// current_postdata.txt = "current_postdata_defined_tumblr";
+						// current_postdata.data.post_videos.push( divs[i].getElementsByTagName('iframe')[0].src);
+					// }
+					console.log('Found tumblr post video='+ divs[i].textContent);
+					current_postdata.txt = "current_postdata_defined_tumblr";
+					current_postdata.data.post_videos.push( divs[i].textContent);
+				}
 			}
+			
+			if(tumblr_text_post.title != 'not_defined')
+			{
+				current_postdata.data.post_text += tumblr_text_post.title + '<br>';
+			}
+			if(tumblr_text_post.txt != 'not_defined')
+			{
+				if(tumblr_text_post.txt != '')
+				{
+					current_postdata.data.post_text += tumblr_text_post.txt + '<br>';
+				}
+			}
+			if(tumblr_text_post.tags != '')
+			{
+				current_postdata.data.post_text += tumblr_text_post.tags.replace("#tags", "");
+			}
+			// current_postdata.txt = "current_postdata_defined_tumblr";
+			// current_postdata.data.post_text = "Hello";
+			console.log('divs numbers = ' +divs.length);
 		}
-		// current_postdata.txt = "current_postdata_defined_tumblr";
-		// current_postdata.data.post_text = "Hello";
-		console.log('divs numbers = ' +divs.length);
 	}
 	// This tested and is working: Linkedin 
 	// Test on other pc
@@ -209,4 +313,6 @@ function gotMessage(message, sender , sendResponse)
 	//send data back
 	console.log('Send current_postdata = '+ current_postdata.txt);
 	sendResponse(current_postdata);
+
 }
+
