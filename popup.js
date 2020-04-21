@@ -4,6 +4,7 @@
 
 
 img_instagram = '<object class="social_icon" type="image/svg+xml" data="instagram.svg "></object>';
+img_flickr = '<object class="social_icon" type="image/svg+xml" data="flickr.svg "></object>';
 img_twitter = '<object class="social_icon" type="image/svg+xml" data="twitter.svg "></object>';
 img_tumblr = '<object class="social_icon" type="image/svg+xml" data="tumblr.svg "></object>';
 img_linkedin = '<object class="social_icon" type="image/svg+xml" data="linkedin.svg "></object>';
@@ -49,12 +50,12 @@ function generete_popup_html( url)
 	
 	
 	if(url.includes("https://www.facebook.com") || url.includes("https://m.facebook.com")){current_social_page = "facebook"; current_img = img_facebook;}
-	if(url.includes("https://www.instagram.com") || url.includes("https://m.instagram.com")){current_social_page = "instagram"; current_img = img_instagram;}
+	if(url.includes("https://www.flickr.com") || url.includes("https://m.flickr.com")){current_social_page = "flickr"; current_img = img_flickr;}
 	if(url.includes("https://twitter.com")){current_social_page = "twitter"; current_img = img_twitter;}
 	if(url.includes("https://www.tumblr.com") || url.includes("https://m.tumblr.com")){current_social_page = "tumblr"; current_img = img_tumblr;}
 	if(url.includes("https://www.linkedin.com") || url.includes("https://m.linkedin.com")){current_social_page = "linkedin"; current_img = img_linkedin;}
 	
-	let social_pages_included = ['facebook', 'instagram', 'twitter', 'tumblr', 'linkedin'];
+	let social_pages_included = ['facebook', 'flickr', 'twitter', 'tumblr', 'linkedin'];
 	
 	
 	chrome.storage.local.get(['logged', 'email' , 'password'], function(data){
@@ -154,7 +155,7 @@ function generete_popup_html( url)
 
 function generete_share_on_html(current_social_page)
 {
-	var social_pages = ["facebook", "instagram", "twitter", "tumblr", "linkedin"];
+	var social_pages = ["facebook", "flickr", "twitter", "tumblr", "linkedin"];
 	my_share_on_html = "";
 	for (key in social_pages) 
 	{
@@ -164,7 +165,7 @@ function generete_share_on_html(current_social_page)
 			my_input = "";
 			
 			if (social_pages[key] === 'facebook') {my_input = img_facebook;}
-			if (social_pages[key] === 'instagram') {my_input = img_instagram;}
+			if (social_pages[key] === 'flickr') {my_input = img_flickr;}
 			if (social_pages[key] === 'twitter') {my_input = img_twitter;}
 			if (social_pages[key] === 'tumblr') {my_input = img_tumblr;}
 			if (social_pages[key] === 'linkedin') {my_input = img_linkedin;}
@@ -239,14 +240,14 @@ function send_register_data()
 	console.log('Register password to post ' + password);
 	
 	
-	var xhttp = new XMLHttpRequest();
+	var xhttp = new XMLHttpRequest();//build a HTML request for signup
 	xhttp.open("POST", "http://sma-a4.herokuapp.com/auth/signup", true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhttp.send('name='+name+'&email='+email+'&password='+password);
 	
 	xhttp.onload = () => {
     // process response
-    if (xhttp.status == 201) 
+    if (xhttp.status == 201) // TODO: We have to also check body message from response and errors 
 	{
         // parse JSON data
         console.log(xhttp.response);
@@ -279,11 +280,11 @@ function login_fct(tab)
 	
 	
 }
-function send_login_data( email, password , form )
+function send_login_data( email, password , registered )
 {
 	// remove the login input content
 	
-	if ( form == null)
+	if ( registered == null)
 	{
 		email = document.getElementById("email_login").value;
 		password = document.getElementById("password_login").value;
@@ -294,14 +295,14 @@ function send_login_data( email, password , form )
 	console.log('Login email to post '+ email);
 	console.log('Login password to post '+ password);
 	
-	var xhttp = new XMLHttpRequest();
+	var xhttp = new XMLHttpRequest();// build a HTTP request to login a user via red team API 
 	xhttp.open("POST", "http://sma-a4.herokuapp.com/auth/login", true);
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	xhttp.send('email='+email+'&password='+password);
 	
 	xhttp.onload = () => {
     // process response
-    if (xhttp.status == 200)
+    if (xhttp.status == 200)//TODO: Check errors and body response message
 	{
         // parse JSON data
         console.log(JSON.parse(xhttp.response));
@@ -327,7 +328,7 @@ function authorize_fct()
 {
 	document.getElementById("authorize_div").innerHTML = 
 	'<input type="submit" id="authorize_request_btn_fb" class="authorize_request_class" name="facebook" value="Authorize Facebook(not done)">'+
-	'<input type="submit" id="authorize_request_btn_in" class="authorize_request_class" name="instagram" value="Authorize Instagram(not done">'+
+	'<input type="submit" id="authorize_request_btn_fl" class="authorize_request_class" name="flickr" value="Authorize Flickr(not done">'+
 	'<input type="submit" id="authorize_request_btn_tu" class="authorize_request_class" name="tumblr" value="Authorize Tumblr">'+
 	'<input type="submit" id="authorize_request_btn_tw" class="authorize_request_class" name="twitter" value="Authorize Twitter">'+
 	'<input type="submit" id="authorize_request_btn_li" class="authorize_request_class" name="linkedin" value="Authorize Linkedin">'+
@@ -336,10 +337,10 @@ function authorize_fct()
 
 
 	document.getElementById("authorize_request_btn_fb").addEventListener("click", function() {authorize_request("facebook");});
-	document.getElementById("authorize_request_btn_in").addEventListener("click", function() {authorize_request("instagram");});
+	document.getElementById("authorize_request_btn_in").addEventListener("click", function() {authorize_request("flickr");});
 	document.getElementById("authorize_request_btn_tu").addEventListener("click", function() {authorize_request("tumblr");});
 	document.getElementById("authorize_request_btn_tw").addEventListener("click", function() {authorize_request("twitter");});
-	document.getElementById("authorize_request_btn_li").addEventListener("click",  function() {authorize_request("linkedin");});
+	document.getElementById("authorize_request_btn_fl").addEventListener("click",  function() {authorize_request("linkedin");});
 	document.getElementById("close_authorize_btn").addEventListener("click", close_authorize_fct);
 
 	// document.getElementById("authorize_div").innerHTML = 
@@ -363,7 +364,7 @@ function authorize_request(clicked_platform)
 	xhttp.open("GET", check_profile_url, true );
 	xhttp.withCredentials = true;
 	xhttp.send();
-	
+	//TODO check errors and success resquest 
 	xhttp.onload = () => {
 		if (xhttp.status == 401) // success but not yet authorized
 		{

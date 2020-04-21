@@ -1,5 +1,5 @@
 //Background js
-// "matches": ["https://facebook.com/*","https://instagram.com/*","https://twitter.com/*","https://tumblr.com/*"],
+// "matches": ["https://facebook.com/*","https://instagram.com/*","https://flickr.com/*","https://twitter.com/*","https://tumblr.com/*"],
 // "matches": ["<all_urls>"],
 // "default_popup": "popup.html",
 // "default_title": "PostIT Plugin"

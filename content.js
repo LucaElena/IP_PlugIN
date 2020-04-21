@@ -21,8 +21,11 @@ function gotMessage(message, sender , sendResponse)
 	///Twitter - done
 	///Linkedin - done with minor bugs
 	///Facebook - done with some bugs
-	///Instagram - not working
-	///Tumblr - not working - content is inside a script/container
+	///Flickr - not done yet-> To do Alex
+	///Tumblr - not working - content is inside a script/container -> TO DO Elena
+	// TO DO Lili -> For all platform search div class and extract videos url when post is done.
+	// TO DO Razvan -> Paste Fericit :))
+	
 	// Extract post data from different social platforms:
 	// This tested and is working with some problems: Facebook 
 	// Problem : image is small 100x100 px -> same problem
@@ -83,6 +86,40 @@ function gotMessage(message, sender , sendResponse)
 				console.log('Found instagram post img='+ divs[i].getElementsByTagName('img')[0].src);
 				current_postdata.txt = "current_postdata_defined_instagram";
 				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+			}
+			
+		}
+		console.log('divs numbers = ' +divs.length);
+	}
+	// Not done yet -> TO DO ALEX
+	//Search div class for text and extract text
+	//Search div class for images and extract url with images
+	//Search div class for images and extract url with videos
+	if(message.txt === "give_me_current_postdata_flickr")
+	{
+		let divs = document.getElementsByTagName('div');
+		for(var i = divs.length - 1; i >= 0; i--)
+		{
+			var div = divs[i];
+			if(divs[i].className == "_1mf _1mj")
+			{
+
+				console.log('Found flickr post text='+ divs[i].textContent);
+				current_postdata.txt = "current_postdata_defined_flickr";
+				current_postdata.data.post_text = divs[i].textContent;
+
+			}
+			if(divs[i].className == "_jfc")
+			{
+				console.log('Found flickr post img='+ divs[i].getElementsByTagName('img')[0].src);
+				current_postdata.txt = "current_postdata_defined_flickr";
+				current_postdata.data.post_imgs.push( divs[i].getElementsByTagName('img')[0].src);
+			}
+			if(divs[i].className == "_jfc")
+			{
+				console.log('Found flickr post video='+ divs[i].getElementsByTagName('video')[0].src);
+				current_postdata.txt = "current_postdata_defined_flickr";
+				current_postdata.data.post_videos.push( divs[i].getElementsByTagName('video')[0].src);
 			}
 			
 		}
