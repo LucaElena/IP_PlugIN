@@ -129,7 +129,9 @@ function generete_popup_html( url)
 							document.getElementById("you_want_to_share_media_div").innerHTML += '<p align=center>Video(s): </p>'; 
 							for (var i = 0; i < message.data.post_videos.length; i++)
 							{
-								document.getElementById("you_want_to_share_media_div").innerHTML +='<video src=' + message.data.post_videos[i] + ' class="share_video">' ; 
+								
+								document.getElementById("you_want_to_share_media_div").innerHTML +='<video controls="" loop="" playsinline="" src=' + message.data.post_videos[i] + ' class="share_video" type="video/mp4"></video>' ; 
+								// document.getElementById("you_want_to_share_media_div").innerHTML +='<iframe src=' + message.data.post_videos[i] + ' class="share_video"></iframe>' ; 
 							}
 						}
 					}
