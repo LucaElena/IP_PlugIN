@@ -330,7 +330,7 @@ function authorize_fct()
 {
 	document.getElementById("authorize_div").innerHTML = 
 	'<input type="submit" id="authorize_request_btn_fb" class="authorize_request_class" name="facebook" value="Authorize Facebook(not done)">'+
-	'<input type="submit" id="authorize_request_btn_fl" class="authorize_request_class" name="flickr" value="Authorize Flickr(not done">'+
+	'<input type="submit" id="authorize_request_btn_fl" class="authorize_request_class" name="flickr" value="Authorize Flickr(not done)">'+
 	'<input type="submit" id="authorize_request_btn_tu" class="authorize_request_class" name="tumblr" value="Authorize Tumblr">'+
 	'<input type="submit" id="authorize_request_btn_tw" class="authorize_request_class" name="twitter" value="Authorize Twitter">'+
 	'<input type="submit" id="authorize_request_btn_li" class="authorize_request_class" name="linkedin" value="Authorize Linkedin">'+
@@ -339,10 +339,10 @@ function authorize_fct()
 
 
 	document.getElementById("authorize_request_btn_fb").addEventListener("click", function() {authorize_request("facebook");});
-	document.getElementById("authorize_request_btn_in").addEventListener("click", function() {authorize_request("flickr");});
+	document.getElementById("authorize_request_btn_fl").addEventListener("click", function() {authorize_request("flickr");});
 	document.getElementById("authorize_request_btn_tu").addEventListener("click", function() {authorize_request("tumblr");});
 	document.getElementById("authorize_request_btn_tw").addEventListener("click", function() {authorize_request("twitter");});
-	document.getElementById("authorize_request_btn_fl").addEventListener("click",  function() {authorize_request("linkedin");});
+	document.getElementById("authorize_request_btn_li").addEventListener("click",  function() {authorize_request("linkedin");});
 	document.getElementById("close_authorize_btn").addEventListener("click", close_authorize_fct);
 
 	// document.getElementById("authorize_div").innerHTML = 
