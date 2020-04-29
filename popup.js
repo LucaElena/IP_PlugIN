@@ -2,7 +2,7 @@
 // "default_popup": "popup.html"
 
 
-
+let social_pages_included = ['facebook', 'flickr', 'twitter', 'tumblr', 'linkedin'];
 img_instagram = '<object class="social_icon" type="image/svg+xml" data="instagram.svg "></object>';
 img_flickr = '<object class="social_icon" type="image/svg+xml" data="flickr.svg "></object>';
 img_twitter = '<object class="social_icon" type="image/svg+xml" data="twitter.svg "></object>';
@@ -55,7 +55,7 @@ function generete_popup_html( url)
 	if(url.includes("https://www.tumblr.com") || url.includes("https://m.tumblr.com")){current_social_page = "tumblr"; current_img = img_tumblr;}
 	if(url.includes("https://www.linkedin.com") || url.includes("https://m.linkedin.com")){current_social_page = "linkedin"; current_img = img_linkedin;}
 	
-	let social_pages_included = ['facebook', 'flickr', 'twitter', 'tumblr', 'linkedin'];
+
 	
 	
 	chrome.storage.local.get(['logged', 'email' , 'password'], function(data){
@@ -135,10 +135,11 @@ function generete_popup_html( url)
 							}
 						}
 					}
+					// buttons listeners
+					document.getElementById("postit_btn").addEventListener("click", function(){postit_fct(current_social_page, message);} );
 				}
 				
-				// buttons listeners
-				document.getElementById("postit_btn").addEventListener("click", postit_fct);
+				
 				
 
 				
@@ -172,7 +173,8 @@ function generete_share_on_html(current_social_page)
 			if (social_pages[key] === 'tumblr') {my_input = img_tumblr;}
 			if (social_pages[key] === 'linkedin') {my_input = img_linkedin;}
 	
-			my_input += '<input type="checkbox" id="'+ social_pages[key] +'" name="tip" value="'+ social_pages[key] +'">';
+			// my_input += '<input type="checkbox" id="checkbox_'+ social_pages[key] +'" name="tip" value="'+ social_pages[key] +'">';
+			my_input += '<input type="checkbox" id="checkbox_'+ social_pages[key] +'">';
 			my_share_on_html +=  my_input;
 			
 		}
@@ -182,15 +184,68 @@ function generete_share_on_html(current_social_page)
 }
 
 
-function postit_fct(tab)
+function postit_fct(current_platorm,message)
 {
-	console.log('Button postit_btn clicked :' + tab.id);
-	//post data on al selected social platforms
 	
-	// TO DO : post text + images via API
+	console.log('Button postit_btn clicked from ' + current_platorm);
+	
+	if(message.data.post_text != "")
+	{ 
+		console.log('Txt data we have to post =' + message.data.post_text);
+	}
+	if(message.data.post_imgs != "")
+	{
+		for (var i = 0; i < message.data.post_imgs.length; i++)
+		{
+			console.log('Img data we have to post =' + message.data.post_imgs[i]);
+		}
+	}
+	if(message.data.post_videos != "")
+	{
+		for (var i = 0; i < message.data.post_videos.length; i++)
+		{
+			console.log('Video data we have to post =' + message.data.post_videos[i]);
+		}
+	}
+
+	for (key in social_pages_included) 
+	{
+		if (social_pages_included[key] != current_social_page)
+		{
+			checkbox = "checkbox_"+social_pages_included[key];
+			console.log('Selected platforms ' + social_pages_included[key] + ' value = ' + document.getElementById(checkbox).checked);
+			if(document.getElementById(checkbox).checked === true)
+			{
+				//post data on al selected social platforms
+				// TO DO : post text + images via API
+				console.log('Start post on '+social_pages_included[key]);
+				if (social_pages_included[key] == "linkedin")
+				{
+					
+				}
+				if (social_pages_included[key] == "twitter")
+				{
+					
+				}
+				if (social_pages_included[key] == "facebook")
+				{
+					
+				}
+				if (social_pages_included[key] == "flickr")
+				{
+					
+				}
+				if (social_pages_included[key] == "tumblr")
+				{
+					
+				}
+			}
+			
+		}
+	}
 	
 	//end
-	window.close();
+	// window.close();
 }
 
 function logout_fct()
