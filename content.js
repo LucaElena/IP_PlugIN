@@ -292,6 +292,7 @@ function gotMessage(message, sender , sendResponse)
 	//send data back
 	console.log('Send current_postdata = '+ current_postdata.txt);
 	sendResponse(current_postdata);
+	urltoFile();
 
 }
 

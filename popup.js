@@ -219,26 +219,7 @@ function postit_fct(current_platorm,message)
 				//post data on al selected social platforms
 				// TO DO : post text + images via API
 				console.log('Start post on '+social_pages_included[key]);
-				if (social_pages_included[key] == "linkedin")
-				{
-					
-				}
-				if (social_pages_included[key] == "twitter")
-				{
-					
-				}
-				if (social_pages_included[key] == "facebook")
-				{
-					
-				}
-				if (social_pages_included[key] == "flickr")
-				{
-					
-				}
-				if (social_pages_included[key] == "tumblr")
-				{
-					
-				}
+				post_on_platform(social_pages_included[key],message);
 			}
 			
 		}
@@ -303,20 +284,20 @@ function send_register_data()
 	xhttp.send('name='+name+'&email='+email+'&password='+password);
 	
 	xhttp.onload = () => {
-    // process response
-    if (xhttp.status == 201) // TODO: We have to also check body message from response and errors 
-	{
-        // parse JSON data
-        console.log(xhttp.response);
-		// do stuff here after register
-		send_login_data( email , password , 'registered');
-		//
-    }
-	else 
-	{
-        console.error('Error!'+xhttp.response);
-    }
-};
+		// process response
+		if (xhttp.status == 201) // TODO: We have to also check body message from response and errors 
+		{
+			// parse JSON data
+			console.log(xhttp.response);
+			// do stuff here after register
+			send_login_data( email , password , 'registered');
+			//
+		}
+		else 
+		{
+			console.error('Error!'+xhttp.response);
+		}
+	};
 }
 
 function login_fct(tab)
@@ -373,14 +354,97 @@ function send_login_data( email, password , registered )
 			clear_html_containers();
 			generete_popup_html( url);
 		//
-    } else {
-        console.error('Error!');
     }
+	else
+	{
+		if (xhttp.status == 401)//TODO: Check other errors
+		{
+			console.log("401 = Wrong password");
+			console.log(xhttp.response);
+		}
+		else
+		{
+			console.error('Error!');
+		}
+	}
 };
 	
 }
+async function post_on_platform(post_platform, message)
+{
+	
+	if(post_platform == "linkedin" || post_platform == "twitter" || post_platform == "tumblr")
+	{
+		// 200["nothing happened"]-> for tumblr: maybe is not implemented yet?
+		// 201{"message":"Posted successfully."}
+		// 401{"error":"Unauthenticated for Twitter."}-> User have to authorize first
+		// 401{"error":"Unauthenticated for Tumblr."}
+		// 500{"error":"Internal server error."}
+		// 503{"error":"Internal server error."}
+		
+		
 
+		
+		var formData = new FormData();
+		
+		if(message.data.post_text != "")//work for twitter . It should work for linkedin too
+		{ 
+			formData.append("text", message.data.post_text);//text
+			
+		}
+		if(message.data.post_imgs != "")//not working .. //linkedin -> twitter image is base64 raw data not url
+		{
+			for (var i = 0; i < message.data.post_imgs.length; i++)
+			{
+				if (message.data.post_imgs[i].substring(0,30).match('^data:image\/(.*);base64,'))
+				{
+					console.log("Image with data...base64 instead of url -> tranform it in file");
+					var file = await base64datatoFile(message.data.post_imgs[i], 'a_'+i+'.png');
+					console.log("Img "+i+" transformed with success in file");
+					formData.append("files[]", file);//file	
+				}
+				if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
+				{
+					console.log("Image with blob+url -> tranform it in file");
+					var url_without_blob =  message.data.post_imgs[i].replace("blob:http", "http");
+					console.log("Img "+i+" transformed with success in file");
+					formData.append("files_url[]", url_without_blob);
+				}
+				else
+				{
+					formData.append("files_url[]", message.data.post_imgs[i]);//url
+				}
+			}
+			
+		}
+		post_form(formData, post_platform);
+		
+	}
+	if(post_platform == "facebook" || post_platform == "flickr")
+	{
+		//TO DO 
+	}
+		
+}
+function post_form(formData, post_platform)
+{
+		var xhttp = new XMLHttpRequest();//build a HTML request for signup
+		xhttp.open("POST", "http://sma-a4.herokuapp.com/"+post_platform+"/post", true);
+		xhttp.send(formData);
+		
+		xhttp.onload = () => {
+			if (xhttp.status == 201) // TODO: We have to also check body message from response and errors 
+			{
 
+				console.log(xhttp.response);
+				// send_login_data( email , password , 'registered');
+			}
+			else 
+			{
+				console.error('Error!'+xhttp.response);
+			}
+		};
+}
 function authorize_fct()
 {
 	document.getElementById("authorize_div").innerHTML = 
@@ -478,8 +542,21 @@ function authorize_request(clicked_platform)
 	
 }
 
+async function base64datatoFile(url, filename, mimeType)
+{
+	mimeType = mimeType || (url.match(/^data:([^;]+);/)||'')[1];
+	return await (fetch(url)
+		.then(async function(res){return await res.arrayBuffer();})
+		.then(async function(buf){return await new File([buf], filename, {type:mimeType});})
+	);
+}
 
-
+// function blobToFile(theBlob, fileName){
+    /////////////////////A Blob() is almost a File() - it's just missing the two properties below which we will add
+    // theBlob.lastModifiedDate = new Date();
+    // theBlob.name = fileName;
+    // return theBlob;
+// }
 
 function clear_html_containers()
 {
@@ -494,4 +571,7 @@ function clear_html_containers()
 	document.getElementById("you_want_to_share_txt_div").innerHTML = '';
 	document.getElementById("you_want_to_share_media_div").innerHTML = '';
 }
+
+
+
 //TO DO : Check if users are authetificated and ask for login if not;
