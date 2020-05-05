@@ -13,12 +13,14 @@ img_facebook = '<object class="social_icon" type="image/svg+xml" data="facebook.
 logged = false;
 email = "not_logged";
 password = "";
+userid = "";
 url = "not_defined"
 
 	// console.log('We deleted stored user data');
 	// chrome.storage.local.set({'email': ""});
 	// chrome.storage.local.set({'password': ""});
 	// chrome.storage.local.set({'logged': false});
+	// chrome.storage.local.set({'userId': ""});
 
 
 
@@ -58,10 +60,11 @@ function generete_popup_html( url)
 
 	
 	
-	chrome.storage.local.get(['logged', 'email' , 'password'], function(data){
+	chrome.storage.local.get(['logged', 'email' , 'password', 'userId'], function(data){
 		logged = data.logged;
 		email = data.email;
 		password = data.password;
+		userid = data.userId;
 		
 		console.log('we currently have saved data: ' + logged + " " + email);
 
@@ -226,7 +229,7 @@ function postit_fct(current_platorm,message)
 	}
 	
 	//end
-	// window.close();
+	window.close();
 }
 
 function logout_fct()
@@ -237,6 +240,7 @@ function logout_fct()
 	chrome.storage.local.set({'email': ""});
 	chrome.storage.local.set({'password': ""});
 	chrome.storage.local.set({'logged': false});
+	chrome.storage.local.set({'userId': ""});
 	
 	clear_html_containers();
 
@@ -249,6 +253,7 @@ function register_fct()
 	console.log('Button register_btn clicked ');
 	//post data on al selected social platforms
 	document.getElementById("login_div").innerHTML = '';
+	document.getElementById("authorize_div").innerHTML = '';
 	// TO DO : register user
 	document.getElementById("register_div").innerHTML = ' '+
 
@@ -295,6 +300,8 @@ function send_register_data()
 		}
 		else 
 		{
+			document.getElementById("authorize_div").innerHTML = ' '+
+								'<p> Register Error : '+xhttp.response+'</p>';
 			console.error('Error!'+xhttp.response);
 		}
 	};
@@ -305,6 +312,7 @@ function login_fct(tab)
 	console.log('Button login_btn clicked ');
 	//post data on al selected social platforms
 	document.getElementById("register_div").innerHTML = '';
+	document.getElementById("authorize_div").innerHTML = '';
 	// TO DO : login user
 	document.getElementById("login_div").innerHTML = ' '+
 	  '<p for="email_login">Email:</p>'+
@@ -349,6 +357,7 @@ function send_login_data( email, password , registered )
 			chrome.storage.local.set({'email': email});
 			chrome.storage.local.set({'password': password});
 			chrome.storage.local.set({'logged': true});
+			chrome.storage.local.set({'userId': 49});//This is hardcoded and only work for our user & TO DO : We have to ask http://sma-a4.herokuapp.com/token to obtain the token and decrypted to obtain the user Id
 			
 			console.log('We save data email = ' + email +' logged '+ true);
 			clear_html_containers();
@@ -359,11 +368,14 @@ function send_login_data( email, password , registered )
 	{
 		if (xhttp.status == 401)//TODO: Check other errors
 		{
-			console.log("401 = Wrong password");
-			console.log(xhttp.response);
+			document.getElementById("authorize_div").innerHTML = ' '+
+								'<p> Wrong password </p>';
+			console.log("401 = Wrong password"+xhttp.response);
 		}
 		else
 		{
+			document.getElementById("authorize_div").innerHTML = ' '+
+								'<p> Login Error : '+xhttp.response+'</p>';
 			console.error('Error!');
 		}
 	}
@@ -375,15 +387,7 @@ async function post_on_platform(post_platform, message)
 	
 	if(post_platform == "linkedin" || post_platform == "twitter" || post_platform == "tumblr")
 	{
-		// 200["nothing happened"]-> for tumblr: maybe is not implemented yet?
-		// 201{"message":"Posted successfully."}
-		// 401{"error":"Unauthenticated for Twitter."}-> User have to authorize first
-		// 401{"error":"Unauthenticated for Tumblr."}
-		// 500{"error":"Internal server error."}
-		// 503{"error":"Internal server error."}
 		
-		
-
 		
 		var formData = new FormData();
 		
@@ -417,17 +421,15 @@ async function post_on_platform(post_platform, message)
 			}
 			
 		}
-		post_form(formData, post_platform);
+		// 200["nothing happened"]-> for tumblr: maybe is not implemented yet?
+		// 201{"message":"Posted successfully."}
+		// 401{"error":"Unauthenticated for Twitter."}-> User have to authorize first
+		// 401{"error":"Unauthenticated for Tumblr."}
+		// 500{"error":"Internal server error."}
+		// 503{"error":"Internal server error."}
 		
-	}
-	if(post_platform == "facebook" || post_platform == "flickr")
-	{
-		//TO DO 
-	}
 		
-}
-function post_form(formData, post_platform)
-{
+
 		var xhttp = new XMLHttpRequest();//build a HTML request for signup
 		xhttp.open("POST", "http://sma-a4.herokuapp.com/"+post_platform+"/post", true);
 		xhttp.send(formData);
@@ -441,10 +443,78 @@ function post_form(formData, post_platform)
 			}
 			else 
 			{
-				console.error('Error!'+xhttp.response);
+				if (xhttp.status == 401)
+				{
+					
+					document.getElementById("authorize_div").innerHTML = ' '+
+								'<p> You need to authentificate first</p>'
+				}
+				else
+				{
+					console.error('Error!'+xhttp.response);
+				}
 			}
 		};
+		
+	}
+	if(post_platform == "facebook" || post_platform == "flickr")
+	{
+		//TO DO 
+		string_post = "";
+		if (post_platform == "facebook")
+		{
+			string_post = "FBFINAL/REST.php?do=";
+		}
+		else
+		{
+			string_post = "DPZ/REST.php?do=";
+		}
+		
+		// FBFINAL/REST.php?do=PostImage&image=https%url.com&mesaj=test_txt&fbid=69420&submit=Image  fb img url + txt
+		// ---FBFINAL/REST.php?do=PostUrl&url=https%url.com&mesaj=test_txt&fbid=69420&submit=Url  fb img url + txt
+		// FBFINAL/REST.php?do=PostMessage&messenger=test_txt&fbid=69420&submit=Message fb only txt
+		// DPZ/REST.php?do=PostImage&image=https%url.com&message=test_txt&userid=8453&submit=PostImage flickr img url + txt
+		
+		if(message.data.post_imgs != "")//not working .. //linkedin -> twitter image is base64 raw data not url
+		{
+			string_post += "PostImage";
+			// for (var i = 0; i < message.data.post_imgs.length; i++)
+			// {
+				// if (message.data.post_imgs[i].substring(0,30).match('^data:image\/(.*);base64,'))
+				if (message.data.post_imgs[0].substring(0,30).match('^data:image\/(.*);base64,'))
+				{
+					console.log("Image with data...base64 instead of url ->TO DO:tranform it in url somehow(imgur)");
+					// var file = await base64datatoFile(message.data.post_imgs[i], 'a_'+i+'.png');
+					// console.log("Img "+i+" transformed with success in file");
+					// formData.append("files[]", file);//file	
+				}
+				// if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
+				if (message.data.post_imgs[0].substring(0,30).match('^blob:http'))
+				{
+					console.log("Image with blob+url ->TO DO:tranform it in url somehow(imgur)");
+					// var url_without_blob =  message.data.post_imgs[i].replace("blob:http", "http");
+					// console.log("Img "+i+" transformed with success in file");
+					// formData.append("files_url[]", url_without_blob);
+				}
+				else
+				{//We have img with url
+					// formData.append("files_url[]", message.data.post_imgs[i]);//url
+					// string_post += "&image="+message.data.post_imgs[i];
+					string_post += "&image="+message.data.post_imgs[0];
+					if(message.data.post_text != "")//work for twitter . It should work for linkedin too
+					{ 
+						// formData.append("text", message.data.post_text);//text
+						string_post +=
+					}
+				}
+			// }
+			
+		}
+	
+	}
+		
 }
+
 function authorize_fct()
 {
 	document.getElementById("authorize_div").innerHTML = 
@@ -478,67 +548,109 @@ function authorize_request(clicked_platform)
 {
 	
 	console.log('Button authorize_request_btn clicked for \"'+ clicked_platform+'\"');
-	
 	var xhttp = new XMLHttpRequest();
-	check_profile_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/profile";
-	check_auth_url = "https://sma-a4.herokuapp.com/"+clicked_platform+"/auth";
-	xhttp.open("GET", check_profile_url, true );
-	xhttp.withCredentials = true;
-	xhttp.send();
-	//TODO check errors and success resquest 
-	xhttp.onload = () => {
-		if (xhttp.status == 401) // success but not yet authorized
-		{
-			// parse JSON data
-			console.log("401 =");
-			console.log(xhttp.response);
-
-			chrome.runtime.sendMessage({
-				txt: "open_auth_url", 
-				data: {
-					subject: "Open auth link in new tab",
-					url: check_auth_url
-				}
-			});
-			// var xhttp2 = new XMLHttpRequest();
-			// check_profile_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/auth";
-			// xhttp2.open("GET", check_profile_url, true );
-			// xhttp2.withCredentials = true;
-			// xhttp2.send();
-			
-			// xhttp2.onload = () => {
-			// if (xhttp2.status == 200) // success but not yet authorized
-			// {
-				// console.log("200 =");
-				// console.log(xhttp2.response);
-			// }
-			// };
-			
-			// console.log(xhttp.getResponseHeader('Set-Cookie'));
-			
-				// chrome.storage.local.set({'email': email});
-				// chrome.storage.local.set({'password': password});
-				// chrome.storage.local.set({'logged': true});
-				// console.log('We save data email = ' + email +' logged '+ true);
-				// clear_html_containers();
-				// generete_popup_html( url);
-			//
-		}
-		else
-		{
-			if (xhttp.status == 403) //not autheficated yet . probably cookie missing
+	
+	if(clicked_platform == "twitter" || clicked_platform == "linkedin" || clicked_platform == "tumblr")
+	{
+		
+		check_profile_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/profile";
+		check_auth_url = "https://sma-a4.herokuapp.com/"+clicked_platform+"/auth";
+		xhttp.open("GET", check_profile_url, true );
+		xhttp.withCredentials = true;
+		xhttp.send();
+		//TODO check errors and success resquest 
+		xhttp.onload = () => {
+			if (xhttp.status == 401) // success but not yet authorized
 			{
-				console.log("403 =");
+				// parse JSON data
+				console.log("401 =");
 				console.log(xhttp.response);
+
+				chrome.runtime.sendMessage({
+					txt: "open_auth_url", 
+					data: {
+						subject: "Open auth link in new tab",
+						url: check_auth_url
+					}
+				});
+				
 			}
 			else
-			{	
-				console.error('Error!');
+			{
+				if (xhttp.status == 403) //not autheficated yet . probably cookie missing
+				{
+					console.log("403 =");
+					console.log(xhttp.response);
+				}
+				else
+				{	
+					console.error('Error!');
+				}
 			}
+		};
+	}
+	if(clicked_platform == "facebook" || clicked_platform == "flickr")
+	{
+
+		if(clicked_platform == "facebook")
+		{
+			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid="+userid;
+			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid=69420";//Hardcoded. Yellow team have problems.
+			check_auth_url = "http://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		}
-	};
-	//post data on al selected social platforms
+		if(clicked_platform == "flickr")
+		{
+			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=getAccountName&userid="+userid;
+			check_auth_url = "http://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+		} 
+		xhttp.open("GET", check_profile_url, true );
+		xhttp.withCredentials = true;
+		xhttp.send();
+		
+		//To DO: test it after 
+		xhttp.onload = () => {
+			if (xhttp.status == 200) // all responses have 200 from Yellow team
+			{
+				// parse JSON data
+				console.log("200 ="+xhttp.response);
+				if(xhttp.response.includes("FULLNAME\":null") || xhttp.response.includes("NAME\":null"))
+				{
+					console.log("Null name -> ??? probably we have to authentificate first or else");
+					chrome.runtime.sendMessage({
+						txt: "open_auth_url", 
+						data: {
+							subject: "Open auth link in new tab",
+							url: check_auth_url
+						}
+					});
+				}
+				
+				if(xhttp.response.includes("invalid user ID"))
+				{
+					console.log("Invalid user ID -> ??? probably we have to authentificate first or else");
+					chrome.runtime.sendMessage({
+						txt: "open_auth_url", 
+						data: {
+							subject: "Open auth link in new tab",
+							url: check_auth_url
+						}
+					});
+				}
+				
+			}
+			else
+			{
+					
+				console.error('Error!'+xhttp.response);
+
+			}
+		};
+		
+	}
+
+	// delete auth buttons
 	document.getElementById("authorize_div").innerHTML = '';
+	
 	
 }
 
