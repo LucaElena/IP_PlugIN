@@ -66,7 +66,7 @@ function generete_popup_html( url)
 		password = data.password;
 		userid = data.userId;
 		
-		console.log('we currently have saved data: ' + logged + " " + email);
+		console.log('We currently have saved data logged=' + logged + " email=" + email + " userid=" + userid);
 
 		if(logged  == false)
 		{
@@ -229,7 +229,7 @@ function postit_fct(current_platorm,message)
 	}
 	
 	//end
-	window.close();
+	// window.close();
 }
 
 function logout_fct()
@@ -410,9 +410,16 @@ async function post_on_platform(post_platform, message)
 				if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
 				{
 					console.log("Image with blob+url -> tranform it in file");
-					var url_without_blob =  message.data.post_imgs[i].replace("blob:http", "http");
+					// var url_without_blob =  message.data.post_imgs[i].replace("blob:http", "http");
+					var data = atob(   //atob (array to binary) converts base64 string to binary string
+						_this.editor.selection.getSelectedImage()  //Canvas
+						.toDataURL("image/png")                    //Base64 URI
+						.split(',')[1]                             //Base64 code
+					  );
+					var file = await new File([data], "a_"+ i +".png", {type:"image/png"}); 
 					console.log("Img "+i+" transformed with success in file");
-					formData.append("files_url[]", url_without_blob);
+					formData.append("files[]", file);
+					// formData.append("files_url[]", url_without_blob);
 				}
 				else
 				{
@@ -425,7 +432,8 @@ async function post_on_platform(post_platform, message)
 		// 201{"message":"Posted successfully."}
 		// 401{"error":"Unauthenticated for Twitter."}-> User have to authorize first
 		// 401{"error":"Unauthenticated for Tumblr."}
-		// 500{"error":"Internal server error."}
+		// 500{"error":"Internal server error."} 
+		// 500{"error":[{"code":187,"message":"Status is a duplicate."}]}
 		// 503{"error":"Internal server error."}
 		
 		
@@ -484,42 +492,91 @@ async function post_on_platform(post_platform, message)
 				if (message.data.post_imgs[0].substring(0,30).match('^data:image\/(.*);base64,'))
 				{
 					console.log("Image with data...base64 instead of url ->TO DO:tranform it in url somehow(imgur)");
-					// var file = await base64datatoFile(message.data.post_imgs[i], 'a_'+i+'.png');
-					// console.log("Img "+i+" transformed with success in file");
+					var file = await base64datatoFile(message.data.post_imgs[0], 'a.png');
+					console.log("Img base64 transformed with success in file ");
+					var url_imgur = await transform_file_in_imgur_url( file);
+					console.log("Img transformed with success from file in url "+url_imgur);
 					// formData.append("files[]", file);//file	
 				}
 				// if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
 				if (message.data.post_imgs[0].substring(0,30).match('^blob:http'))
 				{
 					console.log("Image with blob+url ->TO DO:tranform it in url somehow(imgur)");
-					// var url_without_blob =  message.data.post_imgs[i].replace("blob:http", "http");
+					var url_without_blob =  message.data.post_imgs[0].replace("blob:http", "http");
 					// console.log("Img "+i+" transformed with success in file");
 					// formData.append("files_url[]", url_without_blob);
+					string_post += "&image="+url_without_blob;
+					if (post_platform == "facebook")
+					{
+						string_post += "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
+					}
+					else
+					{
+						string_post += "&message="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
+					}
+					
 				}
 				else
 				{//We have img with url
 					// formData.append("files_url[]", message.data.post_imgs[i]);//url
 					// string_post += "&image="+message.data.post_imgs[i];
 					string_post += "&image="+message.data.post_imgs[0];
-					if(message.data.post_text != "")//work for twitter . It should work for linkedin too
+					if(message.data.post_text != "")
 					{ 
 						// formData.append("text", message.data.post_text);//text
 						if (post_platform == "facebook")
 						{
-							string_post += "&mesaj="+message.data.post_text+"&submit=Image";
+							string_post += "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
 						}
 						else
 						{
-							string_post += "&message="+message.data.post_text+"&submit=PostImage";
+							string_post += "&message="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
 						}
 					}
 				}
 			// }
-			
 		}
 		else
 		{//only txt 
 			string_post += "PostMessage";
+			if(message.data.post_text != "")
+			{ 
+				// formData.append("text", message.data.post_text);//text
+				if (post_platform == "facebook")
+				{
+					string_post += "&messenger="+message.data.post_text+"&fbid=69420&submit=Message";//bug from yellow team-> only some user work
+				}
+				else
+				{// NOT IMPLEMENTED 
+					console.log("We are not allowed to post only text on flickr")
+					// string_post += "&messenger="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
+				}
+			}
+		}
+		
+		console.log("We have to request this :"+ encodeURI(string_post))
+		if(string_post.includes("submit"))
+		{
+			var xhttp = new XMLHttpRequest();//build a HTML request for signup
+			xhttp.open("GET", "http://web-rfnl5hmkocvsi.azurewebsites.net/" + encodeURI(string_post), true);
+			xhttp.send();
+			
+			xhttp.onload = () => {
+				if (xhttp.status == 200) // TODO: We have to also check body message from response and errors 
+				{
+
+					console.log(xhttp.response);
+					// send_login_data( email , password , 'registered');
+				}
+				else 
+				{
+						console.error('Error!'+xhttp.response);
+				}
+			};
+		}
+		else
+		{
+			console.log("Something wrong with url(submit not included):"+string_post);
 		}
 	
 	}
@@ -529,8 +586,8 @@ async function post_on_platform(post_platform, message)
 function authorize_fct()
 {
 	document.getElementById("authorize_div").innerHTML = 
-	'<input type="submit" id="authorize_request_btn_fb" class="authorize_request_class" name="facebook" value="Authorize Facebook(not done)">'+
-	'<input type="submit" id="authorize_request_btn_fl" class="authorize_request_class" name="flickr" value="Authorize Flickr(not done)">'+
+	'<input type="submit" id="authorize_request_btn_fb" class="authorize_request_class" name="facebook" value="Authorize Facebook">'+
+	'<input type="submit" id="authorize_request_btn_fl" class="authorize_request_class" name="flickr" value="Authorize Flickr">'+
 	'<input type="submit" id="authorize_request_btn_tu" class="authorize_request_class" name="tumblr" value="Authorize Tumblr">'+
 	'<input type="submit" id="authorize_request_btn_tw" class="authorize_request_class" name="twitter" value="Authorize Twitter">'+
 	'<input type="submit" id="authorize_request_btn_li" class="authorize_request_class" name="linkedin" value="Authorize Linkedin">'+
@@ -667,6 +724,7 @@ function authorize_request(clicked_platform)
 
 async function base64datatoFile(url, filename, mimeType)
 {
+	console.log("Transform base64 data in file");
 	mimeType = mimeType || (url.match(/^data:([^;]+);/)||'')[1];
 	return await (fetch(url)
 		.then(async function(res){return await res.arrayBuffer();})
@@ -696,5 +754,39 @@ function clear_html_containers()
 }
 
 
+async function transform_file_in_imgur_url(image_file)
+{
+	imgur_api_url = 'https://api.imgur.com/3/image';
+	console.log("We have to transform a image in url . File name="+ image_file.fileName +" file size="+ image_file.fileSize);
+	
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("POST", imgur_api_url, true );
+	xhttp.setRequestHeader("Authorization", "Client-ID 06c7ac752b19b37");
+	
+	var formData = new FormData();
+    formData.append('image', image_file);
+	xhttp.send(formData);
+		
+		
+	var imgur_url = "";
+	xhttp.onload = () => {
+		if (xhttp.status == 200) 
+		{
+
+			console.log(xhttp.response);
+			imgur_url = xhttp.response.link;
+		}
+		else 
+		{
+
+			console.error('Error!'+xhttp.response);
+			imgur_url = "error";
+		}
+		
+	};
+	
+	return imgur_url;
+}
 
 //TO DO : Check if users are authetificated and ask for login if not;
+//TO DO : dinamicaly check if a user open a post in a social platfom
