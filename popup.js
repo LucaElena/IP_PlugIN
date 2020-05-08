@@ -475,7 +475,7 @@ async function post_on_platform(post_platform, message)
 		// FBFINAL/REST.php?do=PostMessage&messenger=test_txt&fbid=69420&submit=Message fb only txt
 		// DPZ/REST.php?do=PostImage&image=https%url.com&message=test_txt&userid=8453&submit=PostImage flickr img url + txt
 		
-		if(message.data.post_imgs != "")//not working .. //linkedin -> twitter image is base64 raw data not url
+		if(message.data.post_imgs != "")//img +- txt
 		{
 			string_post += "PostImage";
 			// for (var i = 0; i < message.data.post_imgs.length; i++)
@@ -504,11 +504,22 @@ async function post_on_platform(post_platform, message)
 					if(message.data.post_text != "")//work for twitter . It should work for linkedin too
 					{ 
 						// formData.append("text", message.data.post_text);//text
-						string_post +=
+						if (post_platform == "facebook")
+						{
+							string_post += "&mesaj="+message.data.post_text+"&submit=Image";
+						}
+						else
+						{
+							string_post += "&message="+message.data.post_text+"&submit=PostImage";
+						}
 					}
 				}
 			// }
 			
+		}
+		else
+		{//only txt 
+			string_post += "PostMessage";
 		}
 	
 	}
