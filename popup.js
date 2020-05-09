@@ -16,6 +16,10 @@ password = "";
 userid = "";
 url = "not_defined"
 
+string_post_fb = "";
+string_post_fl = "";
+string_post = "";
+
 	// console.log('We deleted stored user data');
 	// chrome.storage.local.set({'email': ""});
 	// chrome.storage.local.set({'password': ""});
@@ -50,6 +54,9 @@ function generete_popup_html( url)
 	current_img = "";
 	post_data = "current_postdata_notdefined";
 	
+	string_post_fb = "";
+	string_post_fl = "";
+	string_post = "";
 	
 	if(url.includes("https://www.facebook.com") || url.includes("https://m.facebook.com")){current_social_page = "facebook"; current_img = img_facebook;}
 	if(url.includes("https://www.flickr.com") || url.includes("https://m.flickr.com")){current_social_page = "flickr"; current_img = img_flickr;}
@@ -124,6 +131,16 @@ function generete_popup_html( url)
 							document.getElementById("you_want_to_share_media_div").innerHTML += '<p align=center>Image(s): </p>'; 
 							for (var i = 0; i < message.data.post_imgs.length; i++)
 							{
+								// if (message.data.post_imgs[i].substring(0,30).match('^data:image\/(.*);base64,'))
+								// {
+									// console.log("Base64 url -> tranform in url only 1 time");
+									// var url_imgur = "";
+									// await base64data_to_url(message.data.post_imgs[i], 'a_'+i+'.png', "", function(file){
+										// transform_file_in_imgur_url(file, "", "", function(url_imgur ){
+											// message.data.post_imgs[i] = url_imgur
+										// });
+									// });
+								// }
 								document.getElementById("you_want_to_share_media_div").innerHTML +='<img src=' + message.data.post_imgs[i] + ' class="share_img">' ; 
 							}
 						}
@@ -465,134 +482,208 @@ async function post_on_platform(post_platform, message)
 		};
 		
 	}
+	
+	
 	if(post_platform == "facebook" || post_platform == "flickr")
 	{
-		//TO DO 
-		string_post = "";
+
+		
 		if (post_platform == "facebook")
 		{
-			string_post = "FBFINAL/REST.php?do=";
+			string_post_fb += "FBFINAL/REST.php?do=";
+			string_post += "FBFINAL/REST.php?do=";
 		}
-		else
+		if((post_platform == "flickr"))
 		{
-			string_post = "DPZ/REST.php?do=";
+			string_post_fl += "DPZ/REST.php?do=";
+			string_post += "DPZ/REST.php?do=";
 		}
 		
 		// FBFINAL/REST.php?do=PostImage&image=https%url.com&mesaj=test_txt&fbid=69420&submit=Image  fb img url + txt
 		// ---FBFINAL/REST.php?do=PostUrl&url=https%url.com&mesaj=test_txt&fbid=69420&submit=Url  fb img url + txt
 		// FBFINAL/REST.php?do=PostMessage&messenger=test_txt&fbid=69420&submit=Message fb only txt
 		// DPZ/REST.php?do=PostImage&image=https%url.com&message=test_txt&userid=8453&submit=PostImage flickr img url + txt
-		
+		console.log("fb string="+string_post_fb +" fl string="+string_post_fl);
 		if(message.data.post_imgs != "")//img +- txt
 		{
-			string_post += "PostImage";
+			if (post_platform == "facebook")
+			{
+				string_post_fb += "PostImage";
+			}
+			if((post_platform == "flickr"))
+			{
+				string_post_fl += "PostImage";
+			}
+			console.log("fb string="+string_post_fb +" fl string="+string_post_fl);
 			// for (var i = 0; i < message.data.post_imgs.length; i++)
 			// {
 				// if (message.data.post_imgs[i].substring(0,30).match('^data:image\/(.*);base64,'))
-				if (message.data.post_imgs[0].substring(0,30).match('^data:image\/(.*);base64,'))
-				{
-					console.log("Image with data...base64 instead of url ->TO DO:tranform it in url somehow(imgur)");
-					var file = await base64datatoFile(message.data.post_imgs[0], 'a.png');
-					console.log("Img base64 transformed with success in file ");
-					var url_imgur = await transform_file_in_imgur_url( file);
+			if(message.data.post_imgs[0].substring(0,30).match('^data:image\/(.*);base64,'))
+			{
+				
+				console.log("Image with data...base64 instead of url ->TO DO:tranform it in url somehow(imgur)");
+				var file = await base64datatoFile(message.data.post_imgs[0], 'a_'+ post_platform+'.png');
+				console.log("Img base64 transformed with success in file ");
+				
+				var url_imgur = "";
+				
+				transform_file_in_imgur_url(file, string_post_fb, string_post_fl, function(url_imgur , string_post_fb , string_post_fl ){
+					
 					console.log("Img transformed with success from file in url "+url_imgur);
-					// formData.append("files[]", file);//file	
-					if(message.data.post_text != "")
-					{ 
-						// formData.append("text", message.data.post_text);//text
+					console.log("fb string="+string_post_fb +" fl string="+string_post_fl);
+					if(!url_imgur.includes("error"))
+					{
 						if (post_platform == "facebook")
 						{
-							string_post += "&image=" + url_imgur + "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
+							string_post_fb += "&image=" + url_imgur;
+							if(message.data.post_text != "")
+							{
+								string_post_fb += "&mesaj="+message.data.post_text;
+							}
+							else
+							{
+								string_post_fb += "&mesaj=";
+							}
+							string_post_fb += "&fbid=69420&submit=Image";
 						}
-						else
+						if((post_platform == "flickr"))
 						{
-							string_post += "&image=" + url_imgur + "&message="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
+							string_post_fl += "&image=" +  url_imgur;
+							if(message.data.post_text != "")
+							{
+								string_post_fl += "&message="+message.data.post_text;
+							}
+							else
+							{
+								string_post_fl += "&mesaj=";
+							}
+							string_post_fl += "&userid=" + userid + "&submit=PostImage";
 						}
-					}
-				}
-				// if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
-				if (message.data.post_imgs[0].substring(0,30).match('^blob:http'))
-				{
-					console.log("Image with blob+url ->TO DO:tranform it in url somehow(imgur)");
-					var url_without_blob =  message.data.post_imgs[0].replace("blob:http", "http");
-					// console.log("Img "+i+" transformed with success in file");
-					// formData.append("files_url[]", url_without_blob);
-					string_post += "&image="+url_without_blob;
-					if (post_platform == "facebook")
-					{
-						string_post += "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
+						console.log("fb string="+string_post_fb +" fl string="+string_post_fl);
 					}
 					else
 					{
-						string_post += "&message="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
+						console.log("Failed to transform file in imgur url");
 					}
 					
+					if (post_platform == "facebook")
+					{
+						post_yellow_team(string_post_fb);
+					}
+					if((post_platform == "flickr"))
+					{
+						post_yellow_team(string_post_fl);
+					}
+					
+				});
+			
+			}
+			else if (message.data.post_imgs[0].substring(0,30).match('^blob:http'))
+			{
+				console.log("Image with blob+url ->TO DO:tranform it in url somehow(imgur)");
+				var url_without_blob =  message.data.post_imgs[0].replace("blob:http", "http");
+				// console.log("Img "+i+" transformed with success in file");
+				// formData.append("files_url[]", url_without_blob);
+				
+				if (post_platform == "facebook")
+				{
+					string_post_fb += "&image="+url_without_blob;
+					string_post_fb += "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
+					post_yellow_team(string_post_fb);
 				}
-				else
-				{//We have img with url
-					// formData.append("files_url[]", message.data.post_imgs[i]);//url
-					// string_post += "&image="+message.data.post_imgs[i];
-					string_post += "&image="+message.data.post_imgs[0];
+				if((post_platform == "flickr"))
+				{
+					string_post_fl += "&image="+url_without_blob;
+					string_post_fl += "&message="+message.data.post_text+"&userid=" + userid + "&submit=PostImage";
+					post_yellow_team(string_post_fl);
+				}
+				
+			}
+			else if (message.data.post_imgs[0].substring(0,30).match('^http'))
+			{//We have img with url
+				// formData.append("files_url[]", message.data.post_imgs[i]);//url
+				// string_post += "&image="+message.data.post_imgs[i];
+				console.log("Normal url . Other case(not blob or base64) :"+ message.data.post_imgs[0]);
+				
+				
+				
+					// formData.append("text", message.data.post_text);//text
+				if (post_platform == "facebook")
+				{
+					string_post_fb += "&image="+message.data.post_imgs[0];
 					if(message.data.post_text != "")
 					{ 
-						// formData.append("text", message.data.post_text);//text
-						if (post_platform == "facebook")
-						{
-							string_post += "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
-						}
-						else
-						{
-							string_post += "&message="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
-						}
+						string_post_fb += "&mesaj="+message.data.post_text;
 					}
+					else
+					{
+						string_post_fb += "&mesaj= ";
+					}
+					string_post_fb += "&fbid=69420&submit=Image";
+					post_yellow_team(string_post_fb);
 				}
-			// }
+				else if((post_platform == "flickr"))
+				{
+					string_post_fl += "&image="+message.data.post_imgs[0];
+					if(message.data.post_text != "")
+					{
+						string_post_fl += "&message="+message.data.post_text;
+					}
+					else
+					{
+						string_post_fl += "&message= ";
+					}
+					string_post_fl += "&userid=" + userid + "&submit=PostImage";
+					post_yellow_team(string_post_fl);
+				}
+			}
 		}
 		else
 		{//only txt 
-			string_post += "PostMessage";
+			string_post_fl += "PostMessage";
 			if(message.data.post_text != "")
 			{ 
-				// formData.append("text", message.data.post_text);//text
-				if (post_platform == "facebook")
+				if (string_post_fl == "facebook")
 				{
-					string_post += "&messenger="+message.data.post_text+"&fbid=69420&submit=Message";//bug from yellow team-> only some user work
+					string_post_fl += "&messenger="+message.data.post_text+"&fbid=69420&submit=Message";//bug from yellow team-> only some user work
+					post_yellow_team(string_post_fl);
 				}
-				else
+				else if((post_platform == "flickr"))
 				{// NOT IMPLEMENTED 
 					console.log("We are not allowed to post only text on flickr")
 					// string_post += "&messenger="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
 				}
 			}
 		}
-		
-		console.log("We have to request this :"+ encodeURI(string_post))
-		if(string_post.includes("submit"))
-		{
-			var xhttp = new XMLHttpRequest();//build a HTML request for signup
-			xhttp.open("GET", "http://web-rfnl5hmkocvsi.azurewebsites.net/" + encodeURI(string_post), true);
-			xhttp.send();
-			
-			xhttp.onload = () => {
-				if (xhttp.status == 200) // TODO: We have to also check body message from response and errors 
-				{
-
-					console.log(xhttp.response);
-					// send_login_data( email , password , 'registered');
-				}
-				else 
-				{
-						console.error('Error!'+xhttp.response);
-				}
-			};
-		}
-		else
-		{
-			console.log("Something wrong with url(submit not included):"+string_post);
-		}
-	
 	}
+}
+
+function post_yellow_team(string_post)
+{
+	console.log("We have to request this :"+ encodeURI(string_post))
+	if(string_post.includes("submit") && string_post.includes("do="))
+	{
+		var xhttp = new XMLHttpRequest();//build a HTML request for signup
+		xhttp.open("GET", "https://web-rfnl5hmkocvsi.azurewebsites.net/" + encodeURI(string_post), true);
+		xhttp.send();
 		
+		xhttp.onload = () => {
+			if (xhttp.status == 200) // TODO: We have to also check body message from response and errors 
+			{
+
+				console.log(xhttp.response);
+				// send_login_data( email , password , 'registered');
+			}
+			else 
+			{
+					console.error('Error!'+xhttp.response);
+			}
+		};
+	}
+	else
+	{
+		console.log("Something wrong with url(submit or do= not included):"+string_post);
+	}	
 }
 
 function authorize_fct()
@@ -676,12 +767,12 @@ function authorize_request(clicked_platform)
 		{
 			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid="+userid;
 			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid=69420";//Hardcoded. Yellow team have problems.
-			check_auth_url = "http://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		}
 		if(clicked_platform == "flickr")
 		{
 			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=getAccountName&userid="+userid;
-			check_auth_url = "http://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=login&userid="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		} 
 		xhttp.open("GET", check_profile_url, true );
 		xhttp.withCredentials = true;
@@ -743,6 +834,15 @@ async function base64datatoFile(url, filename, mimeType)
 		.then(async function(buf){return await new File([buf], filename, {type:mimeType});})
 	);
 }
+// async function base64data_to_url(url, filename, mimeType, callback)
+// {
+	// console.log("Transform base64 data in file");
+	// mimeType = mimeType || (url.match(/^data:([^;]+);/)||'')[1];
+	// callback( await (fetch(url)
+		// .then(async function(res){return await res.arrayBuffer();})
+		// .then(async function(buf){return await new File([buf], filename, {type:mimeType});})
+	// ));
+// }
 
 // function blobToFile(theBlob, fileName){
     /////////////////////A Blob() is almost a File() - it's just missing the two properties below which we will add
@@ -766,7 +866,7 @@ function clear_html_containers()
 }
 
 
-async function transform_file_in_imgur_url(image_file)
+async function transform_file_in_imgur_url(image_file, string_post_fb, string_post_fl , callback)
 {
 	imgur_api_url = 'https://api.imgur.com/3/image';
 	console.log("We have to transform a image in url . File name="+ image_file.fileName +" file size="+ image_file.fileSize);
@@ -783,26 +883,29 @@ async function transform_file_in_imgur_url(image_file)
 		
 		
 	imgur_url = "";
-	xhttp.onload = async function (){
+	xhttp.onload = function (){
 		if ( xhttp.status == 200) 
 		{
 
-			console.log(xhttp.response);
-			console.log("Imgur url ="+ http.response.data.link);
-			imgur_url = xhttp.response.data.link;
-			return imgur_url;
+			var obj =  JSON.parse(xhttp.response);
+			console.log(obj);
+			
+			console.log("Imgur url ="+ obj.data.link);
+			imgur_url =  obj.data.link;
+			callback(imgur_url, string_post_fb, string_post_fl);
+			
 		}
 		else 
 		{
 
 			console.error('Error!'+xhttp.response);
-			imgur_url = "error";
-			return imgur_url;
+			imgur_url =  "error";
+			callback(imgur_url, string_post_fb, string_post_fl);
+			
 		}
 		
 	};
-	
-	
+
 }
 
 //TO DO : Check if users are authetificated and ask for login if not;
