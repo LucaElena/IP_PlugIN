@@ -497,6 +497,18 @@ async function post_on_platform(post_platform, message)
 					var url_imgur = await transform_file_in_imgur_url( file);
 					console.log("Img transformed with success from file in url "+url_imgur);
 					// formData.append("files[]", file);//file	
+					if(message.data.post_text != "")
+					{ 
+						// formData.append("text", message.data.post_text);//text
+						if (post_platform == "facebook")
+						{
+							string_post += "&image=" + url_imgur + "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
+						}
+						else
+						{
+							string_post += "&image=" + url_imgur + "&message="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
+						}
+					}
 				}
 				// if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
 				if (message.data.post_imgs[0].substring(0,30).match('^blob:http'))
@@ -762,30 +774,35 @@ async function transform_file_in_imgur_url(image_file)
 	var xhttp = new XMLHttpRequest();
 	xhttp.open("POST", imgur_api_url, true );
 	xhttp.setRequestHeader("Authorization", "Client-ID 06c7ac752b19b37");
+
 	
 	var formData = new FormData();
     formData.append('image', image_file);
+	
 	xhttp.send(formData);
 		
 		
-	var imgur_url = "";
-	xhttp.onload = () => {
-		if (xhttp.status == 200) 
+	imgur_url = "";
+	xhttp.onload = async function (){
+		if ( xhttp.status == 200) 
 		{
 
 			console.log(xhttp.response);
-			imgur_url = xhttp.response.link;
+			console.log("Imgur url ="+ http.response.data.link);
+			imgur_url = xhttp.response.data.link;
+			return imgur_url;
 		}
 		else 
 		{
 
 			console.error('Error!'+xhttp.response);
 			imgur_url = "error";
+			return imgur_url;
 		}
 		
 	};
 	
-	return imgur_url;
+	
 }
 
 //TO DO : Check if users are authetificated and ask for login if not;
