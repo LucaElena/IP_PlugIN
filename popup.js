@@ -420,7 +420,7 @@ async function post_on_platform(post_platform, message)
 				if (message.data.post_imgs[i].substring(0,30).match('^data:image\/(.*);base64,'))
 				{
 					console.log("Image with data...base64 instead of url -> tranform it in file");
-					var file = await base64datatoFile(message.data.post_imgs[i], 'a_'+i+'.png');
+					var file = await base64datatoFile(message.data.post_imgs[i], 'a_'+i+'_'+post_platform+'.png');
 					console.log("Img "+i+" transformed with success in file");
 					formData.append("files[]", file);//file	
 				}
@@ -465,18 +465,24 @@ async function post_on_platform(post_platform, message)
 
 				console.log(xhttp.response);
 				// send_login_data( email , password , 'registered');
+				document.getElementById("authorize_div").innerHTML += ' '+
+								'<p> Posted successfully on ' + post_platform + '  </p>';
 			}
 			else 
 			{
 				if (xhttp.status == 401)
 				{
 					
-					document.getElementById("authorize_div").innerHTML = ' '+
-								'<p> You need to authentificate first</p>'
+					document.getElementById("authorize_div").innerHTML += ' '+
+								'<p> You need to authentificate first on ' + post_platform + ' </p>'
+					
 				}
 				else
 				{
 					console.error('Error!'+xhttp.response);
+					document.getElementById("authorize_div").innerHTML += ' '+
+								'<p> Post error for ' + post_platform + '  </p>';
+					
 				}
 			}
 		};
@@ -568,11 +574,11 @@ async function post_on_platform(post_platform, message)
 					
 					if (post_platform == "facebook")
 					{
-						post_yellow_team(string_post_fb);
+						post_yellow_team(string_post_fb , post_platform);
 					}
 					if((post_platform == "flickr"))
 					{
-						post_yellow_team(string_post_fl);
+						post_yellow_team(string_post_fl , post_platform);
 					}
 					
 				});
@@ -589,13 +595,13 @@ async function post_on_platform(post_platform, message)
 				{
 					string_post_fb += "&image="+url_without_blob;
 					string_post_fb += "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
-					post_yellow_team(string_post_fb);
+					post_yellow_team(string_post_fb , post_platform);
 				}
 				if((post_platform == "flickr"))
 				{
 					string_post_fl += "&image="+url_without_blob;
 					string_post_fl += "&message="+message.data.post_text+"&userid=" + userid + "&submit=PostImage";
-					post_yellow_team(string_post_fl);
+					post_yellow_team(string_post_fl , post_platform);
 				}
 				
 			}
@@ -620,7 +626,7 @@ async function post_on_platform(post_platform, message)
 						string_post_fb += "&mesaj= ";
 					}
 					string_post_fb += "&fbid=69420&submit=Image";
-					post_yellow_team(string_post_fb);
+					post_yellow_team(string_post_fb , post_platform);
 				}
 				else if((post_platform == "flickr"))
 				{
@@ -634,7 +640,7 @@ async function post_on_platform(post_platform, message)
 						string_post_fl += "&message= ";
 					}
 					string_post_fl += "&userid=" + userid + "&submit=PostImage";
-					post_yellow_team(string_post_fl);
+					post_yellow_team(string_post_fl , post_platform);
 				}
 			}
 		}
@@ -646,7 +652,7 @@ async function post_on_platform(post_platform, message)
 				if (string_post_fl == "facebook")
 				{
 					string_post_fl += "&messenger="+message.data.post_text+"&fbid=69420&submit=Message";//bug from yellow team-> only some user work
-					post_yellow_team(string_post_fl);
+					post_yellow_team(string_post_fl , post_platform);
 				}
 				else if((post_platform == "flickr"))
 				{// NOT IMPLEMENTED 
@@ -658,7 +664,7 @@ async function post_on_platform(post_platform, message)
 	}
 }
 
-function post_yellow_team(string_post)
+function post_yellow_team(string_post , post_platform)
 {
 	console.log("We have to request this :"+ encodeURI(string_post))
 	if(string_post.includes("submit") && string_post.includes("do="))
@@ -673,10 +679,15 @@ function post_yellow_team(string_post)
 
 				console.log(xhttp.response);
 				// send_login_data( email , password , 'registered');
+				
+				document.getElementById("authorize_div").innerHTML += ' '+
+								'<p> Posted successfully on ' + post_platform + '  </p>';
 			}
 			else 
 			{
 					console.error('Error!'+xhttp.response);
+					document.getElementById("authorize_div").innerHTML += ' '+
+								'<p> Post error for ' + post_platform + '  </p>';
 			}
 		};
 	}

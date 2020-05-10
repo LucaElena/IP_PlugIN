@@ -242,13 +242,15 @@ function gotMessage(message, sender , sendResponse)
 				
 				if(tumblr_text_post.title != 'not_defined')
 				{
-					current_postdata.data.post_text += tumblr_text_post.title + '<br>';
+					// current_postdata.data.post_text += tumblr_text_post.title + '<br>';
+					current_postdata.data.post_text += tumblr_text_post.title + ' ';
 				}
 				if(tumblr_text_post.txt != 'not_defined')
 				{
 					if(tumblr_text_post.txt != '')
 					{
-						current_postdata.data.post_text += tumblr_text_post.txt + '<br>';
+						// current_postdata.data.post_text += tumblr_text_post.txt + '<br>';
+						current_postdata.data.post_text += tumblr_text_post.txt + ' ';
 					}
 				}
 				if(tumblr_text_post.tags != '')
