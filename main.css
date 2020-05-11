@@ -6,16 +6,36 @@
 	width: 220px;
 	background: #fff;
 	font-family: Times, "Times New Roman", serif;
-	border: 0px;
+	border: 1px;
 	margin: 0px;
 	padding: 5px;
+	border-style: outset;
 }
+
 
 .social_icon
 {
     width: 30px;
     height: 30px;
 	border-radius: 10px;
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+.share_img
+{
+    width: 100px;
+    height: 100px;
+	border-radius: 0px;
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+.share_video
+{
+    width: 200px;
+    height: 200px;
+	border-radius: 0px;
 	border: 0px;
 	margin: 0px;
 	padding: 0px;
@@ -37,10 +57,56 @@
 
 
 
-.postit_btn 
+.general_class_btn
 {
-	padding: 8px 16px;
-	color: #000;
-	border-radius: 5px;
+	padding: 8px 13px;
+	background-color: #3b5998;
+	color: white;
+	border-radius: 1px;
 	font-size: 15px;
+	border: 1px blue; /* Blue border */
+	width: 100%;
 }
+.general_class_btn:hover {
+  background-color: #0e76a8;
+}
+
+.authorize_request_class
+{
+	padding: 8px 13px;
+	border-radius: 1px;
+	font-size: 10px;
+	width: 100%;
+}
+
+
+.meniu-group input {
+  background-color: #3b5998; /* Blue background */
+  border: 1px blue; /* Blue border */
+  color: white; /* White text */
+  padding: 8px 13px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
+  font-size: 15px;
+  width: 50%;
+  white-space: normal;
+
+  
+}
+
+/* Clear floats (clearfix hack) */
+.meniu-group:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.meniu-group input:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.meniu-group input:hover {
+  background-color: #0e76a8;
+}
+

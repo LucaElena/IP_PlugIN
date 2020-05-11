@@ -32,7 +32,7 @@ function gotMessage(message, sender , sendResponse)
 		{
 			var div = divs[i];
 			//extract text from post 
-			if(divs[i].className == "_1mf _1mj")
+			if(divs[i].className == "du4w35lb k4urcfbm l9j0dhe7 dati1w0a hv4rvrfc df2bnetk buofh1pr rq0escxv o0xt3n8b")
 			{
 
 				console.log('Found facebook post text='+ divs[i].textContent);
@@ -41,7 +41,7 @@ function gotMessage(message, sender , sendResponse)
 
 			}
 			//extract img from post 
-			if(divs[i].className == "_jfc")
+			if(divs[i].className == "scb9dxdr dflh9lhu")
 			{
 				if(divs[i].getElementsByTagName('img').length  != 0)
 				{
@@ -242,15 +242,13 @@ function gotMessage(message, sender , sendResponse)
 				
 				if(tumblr_text_post.title != 'not_defined')
 				{
-					// current_postdata.data.post_text += tumblr_text_post.title + '<br>';
-					current_postdata.data.post_text += tumblr_text_post.title + ' ';
+					current_postdata.data.post_text += tumblr_text_post.title + '<br>';
 				}
 				if(tumblr_text_post.txt != 'not_defined')
 				{
 					if(tumblr_text_post.txt != '')
 					{
-						// current_postdata.data.post_text += tumblr_text_post.txt + '<br>';
-						current_postdata.data.post_text += tumblr_text_post.txt + ' ';
+						current_postdata.data.post_text += tumblr_text_post.txt + '<br>';
 					}
 				}
 				if(tumblr_text_post.tags != '')
@@ -297,6 +295,3 @@ function gotMessage(message, sender , sendResponse)
 	urltoFile();
 
 }
-
-
-

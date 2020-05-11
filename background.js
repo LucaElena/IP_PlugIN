@@ -1,5 +1,5 @@
 //Background js
-// "matches": ["https://facebook.com/*","https://instagram.com/*","https://twitter.com/*","https://tumblr.com/*"],
+// "matches": ["https://facebook.com/*","https://instagram.com/*","https://flickr.com/*","https://twitter.com/*","https://tumblr.com/*"],
 // "matches": ["<all_urls>"],
 // "default_popup": "popup.html",
 // "default_title": "PostIT Plugin"
@@ -15,9 +15,9 @@ console.log('Background Chrome extension running!');
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
 		
-        if (request.msg === "give_me_current_url")
+        if (request.txt === "give_me_current_url")
 		{
-            console.log('Am primit intrebare :' + request.msg);
+            console.log('Am primit intrebare :' + request.txt);
            
 			/// find current tab url and send it 
 			let params = {
@@ -36,10 +36,18 @@ chrome.runtime.onMessage.addListener(
 				});
 			}
         }
-		if (request.msg === "current_url_received")
+		if (request.txt === "open_auth_url")
 		{
-			console.log('Am primit intrebare : current_url_received -> do nothing');
-		}
-    }
+            console.log('Am primit intrebare :' + request.txt);
+
+			chrome.tabs.create({ url: request.data.url });
+
+        }
+		// error with port closed
+		// setTimeout(function()
+		// {
+			// sendResponse({status: true});
+		// }, 1);
+	}
 );
 
