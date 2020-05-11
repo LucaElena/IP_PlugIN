@@ -19,6 +19,9 @@ url = "not_defined"
 string_post_fb = "";
 string_post_fl = "";
 string_post = "";
+var formData_li;
+var formData_tw;
+var formData_tu;
 
 	// console.log('We deleted stored user data');
 	// chrome.storage.local.set({'email': ""});
@@ -57,6 +60,9 @@ function generete_popup_html( url)
 	string_post_fb = "";
 	string_post_fl = "";
 	string_post = "";
+	formData_li = new FormData();
+	formData_tw = new FormData();
+	formData_tu = new FormData();
 	
 	if(url.includes("https://www.facebook.com") || url.includes("https://m.facebook.com")){current_social_page = "facebook"; current_img = img_facebook;}
 	if(url.includes("https://www.flickr.com") || url.includes("https://m.flickr.com")){current_social_page = "flickr"; current_img = img_flickr;}
@@ -404,13 +410,12 @@ async function post_on_platform(post_platform, message)
 	
 	if(post_platform == "linkedin" || post_platform == "twitter" || post_platform == "tumblr")
 	{
-		
-		
-		var formData = new FormData();
-		
+
 		if(message.data.post_text != "")//work for twitter . It should work for linkedin too
 		{ 
-			formData.append("text", message.data.post_text);//text
+			if(post_platform == "linkedin"){formData_li.append("text", message.data.post_text);};//text
+			if(post_platform == "tumblr"){formData_tu.append("text", message.data.post_text);};//text
+			if(post_platform == "twitter"){formData_tw.append("text", message.data.post_text);};//text
 			
 		}
 		if(message.data.post_imgs != "")//not working .. //linkedin -> twitter image is base64 raw data not url
@@ -422,70 +427,52 @@ async function post_on_platform(post_platform, message)
 					console.log("Image with data...base64 instead of url -> tranform it in file");
 					var file = await base64datatoFile(message.data.post_imgs[i], 'a_'+i+'_'+post_platform+'.png');
 					console.log("Img "+i+" transformed with success in file");
-					formData.append("files[]", file);//file	
+					if(post_platform == "linkedin"){formData_li.append("files[]", file);};//file
+					if(post_platform == "tumblr"){formData_tu.append("files[]", file);};//file
+					if(post_platform == "twitter"){formData_tw.append("files[]", file);};//file
+					
+					// var url_imgur = "";
+					// await base64data_to_url(message.data.post_imgs[i], 'a_'+i+'_'+post_platform+'.png', "", function(file){
+						// transform_file_in_imgur_url(file, "", "", function(url_imgur ){
+							// message.data.post_imgs[i] = url_imgur
+							
+						// });
+					// });
+					
+					
 				}
 				if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
 				{
 					console.log("Image with blob+url -> tranform it in file");
-					// var url_without_blob =  message.data.post_imgs[i].replace("blob:http", "http");
-					var data = atob(   //atob (array to binary) converts base64 string to binary string
-						_this.editor.selection.getSelectedImage()  //Canvas
-						.toDataURL("image/png")                    //Base64 URI
-						.split(',')[1]                             //Base64 code
-					  );
-					var file = await new File([data], "a_"+ i +".png", {type:"image/png"}); 
-					console.log("Img "+i+" transformed with success in file");
-					formData.append("files[]", file);
+
+					var file = await blob_to_data(message.data.post_imgs[i]);
+					console.log("Blob url "+i+" transformed with success in data");
+					// var file = await new File([data_from_blob], "a_"+ i +".png", {type:"image/png"}); 
+					
+					if(post_platform == "linkedin"){formData_li.append("files[]", file);};//file
+					if(post_platform == "tumblr"){formData_tu.append("files[]", file);};//file
+					if(post_platform == "twitter"){formData_tw.append("files[]", file);};//file
+					
+					
+					  
+					// var file = await new File([data], "a_"+ i +".png", {type:"image/png"}); 
+					// console.log("Img "+i+" transformed with success in file");
+					// formData.append("files[]", file);
 					// formData.append("files_url[]", url_without_blob);
 				}
 				else
 				{
-					formData.append("files_url[]", message.data.post_imgs[i]);//url
+					if(post_platform == "linkedin"){formData_li.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
+					if(post_platform == "tumblr"){formData_tu.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
+					if(post_platform == "twitter"){formData_tw.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
 				}
 			}
-			
+
 		}
-		// 200["nothing happened"]-> for tumblr: maybe is not implemented yet?
-		// 201{"message":"Posted successfully."}
-		// 401{"error":"Unauthenticated for Twitter."}-> User have to authorize first
-		// 401{"error":"Unauthenticated for Tumblr."}
-		// 500{"error":"Internal server error."} 
-		// 500{"error":[{"code":187,"message":"Status is a duplicate."}]}
-		// 503{"error":"Internal server error."}
+		if(post_platform == "linkedin"){post_red_team(post_platform, formData_li);}; 
+		if(post_platform == "tumblr"){post_red_team(post_platform, formData_tu);}; 
+		if(post_platform == "twitter"){post_red_team(post_platform, formData_tw);}; 
 		
-		
-
-		var xhttp = new XMLHttpRequest();//build a HTML request for signup
-		xhttp.open("POST", "http://sma-a4.herokuapp.com/"+post_platform+"/post", true);
-		xhttp.send(formData);
-		
-		xhttp.onload = () => {
-			if (xhttp.status == 201) // TODO: We have to also check body message from response and errors 
-			{
-
-				console.log(xhttp.response);
-				// send_login_data( email , password , 'registered');
-				document.getElementById("authorize_div").innerHTML += ' '+
-								'<p> Posted successfully on ' + post_platform + '  </p>';
-			}
-			else 
-			{
-				if (xhttp.status == 401)
-				{
-					
-					document.getElementById("authorize_div").innerHTML += ' '+
-								'<p> You need to authentificate first on ' + post_platform + ' </p>'
-					
-				}
-				else
-				{
-					console.error('Error!'+xhttp.response);
-					document.getElementById("authorize_div").innerHTML += ' '+
-								'<p> Post error for ' + post_platform + '  </p>';
-					
-				}
-			}
-		};
 		
 	}
 	
@@ -593,14 +580,14 @@ async function post_on_platform(post_platform, message)
 				
 				if (post_platform == "facebook")
 				{
-					string_post_fb += "&image="+url_without_blob;
-					string_post_fb += "&mesaj="+message.data.post_text+"&fbid=69420&submit=Image";
+					string_post_fb += "&image="+encodeURIComponent(url_without_blob);
+					string_post_fb += "&mesaj="+encodeURIComponent(message.data.post_text)+"&fbid=69420&submit=Image";
 					post_yellow_team(string_post_fb , post_platform);
 				}
 				if((post_platform == "flickr"))
 				{
-					string_post_fl += "&image="+url_without_blob;
-					string_post_fl += "&message="+message.data.post_text+"&userid=" + userid + "&submit=PostImage";
+					string_post_fl += "&image="+encodeURIComponent(url_without_blob);
+					string_post_fl += "&message="+encodeURIComponent(message.data.post_text)+"&userid=" + userid + "&submit=PostImage";
 					post_yellow_team(string_post_fl , post_platform);
 				}
 				
@@ -616,10 +603,10 @@ async function post_on_platform(post_platform, message)
 					// formData.append("text", message.data.post_text);//text
 				if (post_platform == "facebook")
 				{
-					string_post_fb += "&image="+message.data.post_imgs[0];
+					string_post_fb += "&image="+encodeURIComponent(message.data.post_imgs[0]);
 					if(message.data.post_text != "")
 					{ 
-						string_post_fb += "&mesaj="+message.data.post_text;
+						string_post_fb += "&mesaj="+encodeURIComponent(message.data.post_text);
 					}
 					else
 					{
@@ -630,10 +617,10 @@ async function post_on_platform(post_platform, message)
 				}
 				else if((post_platform == "flickr"))
 				{
-					string_post_fl += "&image="+message.data.post_imgs[0];
+					string_post_fl += "&image="+encodeURIComponent(message.data.post_imgs[0]);
 					if(message.data.post_text != "")
 					{
-						string_post_fl += "&message="+message.data.post_text;
+						string_post_fl += "&message="+encodeURIComponent(message.data.post_text);
 					}
 					else
 					{
@@ -651,7 +638,7 @@ async function post_on_platform(post_platform, message)
 			{ 
 				if (string_post_fl == "facebook")
 				{
-					string_post_fl += "&messenger="+message.data.post_text+"&fbid=69420&submit=Message";//bug from yellow team-> only some user work
+					string_post_fl += "&messenger="+encodeURIComponent(message.data.post_text)+"&fbid=69420&submit=Message";//bug from yellow team-> only some user work
 					post_yellow_team(string_post_fl , post_platform);
 				}
 				else if((post_platform == "flickr"))
@@ -664,13 +651,57 @@ async function post_on_platform(post_platform, message)
 	}
 }
 
+function post_red_team(post_platform, formData)
+{
+	// 200["nothing happened"]-> for tumblr: maybe is not implemented yet?
+	// 201{"message":"Posted successfully."}
+	// 401{"error":"Unauthenticated for Twitter."}-> User have to authorize first
+	// 401{"error":"Unauthenticated for Tumblr."}
+	// 500{"error":"Internal server error."} 
+	// 500{"error":[{"code":187,"message":"Status is a duplicate."}]}
+	// 503{"error":"Internal server error."}
+	
+	console.log("We start to make post request for "+post_platform);
+	var xhttp = new XMLHttpRequest();//build a HTML request for signup
+	xhttp.open("POST", "http://sma-a4.herokuapp.com/"+post_platform+"/post", true);
+	xhttp.withCredentials = true;
+	xhttp.send(formData);
+	
+	xhttp.onload = () => {
+		if (xhttp.status == 201) // TODO: We have to also check body message from response and errors 
+		{
+
+			console.log(xhttp.response);
+			// send_login_data( email , password , 'registered');
+			document.getElementById("authorize_div").innerHTML += ' '+
+							'<p> Posted successfully on ' + post_platform + '  </p>';
+		}
+		else 
+		{
+			if (xhttp.status == 401)
+			{
+				
+				document.getElementById("authorize_div").innerHTML += ' '+
+							'<p> You need to authentificate first on ' + post_platform + ' </p>'
+				
+			}
+			else
+			{
+				console.error('Error!'+xhttp.response);
+				document.getElementById("authorize_div").innerHTML += ' '+
+							'<p> Post error for ' + post_platform + '  </p>';
+				
+			}
+		}
+	};
+}
 function post_yellow_team(string_post , post_platform)
 {
-	console.log("We have to request this :"+ encodeURI(string_post))
+	console.log("We have to request this :"+ string_post)
 	if(string_post.includes("submit") && string_post.includes("do="))
 	{
 		var xhttp = new XMLHttpRequest();//build a HTML request for signup
-		xhttp.open("GET", "https://web-rfnl5hmkocvsi.azurewebsites.net/" + encodeURI(string_post), true);
+		xhttp.open("GET", "https://web-rfnl5hmkocvsi.azurewebsites.net/" + string_post, true);
 		xhttp.send();
 		
 		xhttp.onload = () => {
@@ -735,48 +766,53 @@ function authorize_request(clicked_platform)
 	if(clicked_platform == "twitter" || clicked_platform == "linkedin" || clicked_platform == "tumblr")
 	{
 		
-		check_profile_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/profile";
-		check_auth_url = "https://sma-a4.herokuapp.com/"+clicked_platform+"/auth";
-		xhttp.open("GET", check_profile_url, true );
+		// check_profile_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/profile";
+		check_auth_url = "http://sma-a4.herokuapp.com/"+clicked_platform+"/auth";
+		// xhttp.open("GET", check_profile_url, true );
 		xhttp.withCredentials = true;
-		xhttp.send();
-		//TODO check errors and success resquest 
-		xhttp.onload = () => {
-			if (xhttp.status == 401) // success but not yet authorized
-			{
-				// parse JSON data
-				console.log("401 =");
-				console.log(xhttp.response);
+		// xhttp.send();
+		
+		// xhttp.onload = () => {
+			// if (xhttp.status == 401) // success but not yet authorized
+			// {// parse JSON data
+				// console.log("401 =");
+				// console.log(xhttp.response);
 
-				chrome.runtime.sendMessage({
-					txt: "open_auth_url", 
-					data: {
-						subject: "Open auth link in new tab",
-						url: check_auth_url
-					}
-				});
-				
+				// chrome.runtime.sendMessage({
+					// txt: "open_auth_url", 
+					// data: {
+						// subject: "Open auth link in new tab",
+						// url: check_auth_url
+					// }
+				// });
+			// }
+			// else
+			// {
+				// if (xhttp.status == 403) //not autheficated yet . probably cookie missing
+				// {
+					// console.log("403 =");
+					// console.log(xhttp.response);
+				// }
+				// else
+				// {	
+					// console.error('Error!');
+				// }
+			// }
+		// };
+		chrome.runtime.sendMessage({
+			txt: "open_auth_url", 
+			data: {
+				subject: "Open auth link in new tab",
+				url: check_auth_url
 			}
-			else
-			{
-				if (xhttp.status == 403) //not autheficated yet . probably cookie missing
-				{
-					console.log("403 =");
-					console.log(xhttp.response);
-				}
-				else
-				{	
-					console.error('Error!');
-				}
-			}
-		};
+		});
 	}
 	if(clicked_platform == "facebook" || clicked_platform == "flickr")
 	{
 
 		if(clicked_platform == "facebook")
 		{
-			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid="+userid;
+			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid="+userid;	
 			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid=69420";//Hardcoded. Yellow team have problems.
 			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		}
@@ -785,48 +821,57 @@ function authorize_request(clicked_platform)
 			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=getAccountName&userid="+userid;
 			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=login&userid="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		} 
-		xhttp.open("GET", check_profile_url, true );
-		xhttp.withCredentials = true;
-		xhttp.send();
+		
+		
+		// xhttp.open("GET", check_profile_url, true );
+		// xhttp.withCredentials = true;
+		// xhttp.send();
 		
 		//To DO: test it after 
-		xhttp.onload = () => {
-			if (xhttp.status == 200) // all responses have 200 from Yellow team
-			{
-				// parse JSON data
-				console.log("200 ="+xhttp.response);
-				if(xhttp.response.includes("FULLNAME\":null") || xhttp.response.includes("NAME\":null"))
-				{
-					console.log("Null name -> ??? probably we have to authentificate first or else");
-					chrome.runtime.sendMessage({
-						txt: "open_auth_url", 
-						data: {
-							subject: "Open auth link in new tab",
-							url: check_auth_url
-						}
-					});
-				}
+		// xhttp.onload = () => {
+			// if (xhttp.status == 200) // all responses have 200 from Yellow team
+			// {
+				// //parse JSON data
+				// console.log("200 ="+xhttp.response);
+				// if(xhttp.response.includes("FULLNAME\":null") || xhttp.response.includes("NAME\":null"))
+				// {
+					// console.log("Null name -> ??? probably we have to authentificate first or else");
+					// chrome.runtime.sendMessage({
+						// txt: "open_auth_url", 
+						// data: {
+							// subject: "Open auth link in new tab",
+							// url: check_auth_url
+						// }
+					// });
+				// }
 				
-				if(xhttp.response.includes("invalid user ID"))
-				{
-					console.log("Invalid user ID -> ??? probably we have to authentificate first or else");
-					chrome.runtime.sendMessage({
-						txt: "open_auth_url", 
-						data: {
-							subject: "Open auth link in new tab",
-							url: check_auth_url
-						}
-					});
-				}
+				// if(xhttp.response.includes("invalid user ID"))
+				// {
+					// console.log("Invalid user ID -> ??? probably we have to authentificate first or else");
+					// chrome.runtime.sendMessage({
+						// txt: "open_auth_url", 
+						// data: {
+							// subject: "Open auth link in new tab",
+							// url: check_auth_url
+						// }
+					// });
+				// }
 				
-			}
-			else
-			{
+			// }
+			// else
+			// {
 					
-				console.error('Error!'+xhttp.response);
+				// console.error('Error!'+xhttp.response);
 
+			// }
+		// };
+		chrome.runtime.sendMessage({
+			txt: "open_auth_url", 
+			data: {
+				subject: "Open auth link in new tab",
+				url: check_auth_url
 			}
-		};
+		});
 		
 	}
 
@@ -838,7 +883,7 @@ function authorize_request(clicked_platform)
 
 async function base64datatoFile(url, filename, mimeType)
 {
-	console.log("Transform base64 data in file");
+	console.log("Transform base64 data in file " + filename);
 	mimeType = mimeType || (url.match(/^data:([^;]+);/)||'')[1];
 	return await (fetch(url)
 		.then(async function(res){return await res.arrayBuffer();})
@@ -917,6 +962,32 @@ async function transform_file_in_imgur_url(image_file, string_post_fb, string_po
 		
 	};
 
+}
+
+async function blob_to_data(bloburl)
+{
+	var xhr = new XMLHttpRequest;
+	xhr.responseType = 'blob';
+	var blobAsDataUrl = "";
+	xhr.onload = function(formData, post_platform) {
+	   var recoveredBlob = xhr.response;
+
+	   var reader = new FileReader;
+
+	   reader.onload = async function(formData, post_platform) {
+			blobAsDataUrl = await reader.result;
+			console.log("Blob Data:"+blobAsDataUrl);
+			
+			var file = await base64datatoFile(blobAsDataUrl, 'a_'+i+'_'+post_platform+'.png'); 
+			console.log("Data "+i+" transformed with success in file");
+	   };
+
+	   reader.readAsDataURL(recoveredBlob);
+	};
+
+	xhr.open('GET', bloburl);
+	await xhr.send();
+	return blobAsDataUrl;
 }
 
 //TO DO : Check if users are authetificated and ask for login if not;
