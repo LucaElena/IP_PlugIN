@@ -28,6 +28,7 @@ var formData_tu;
 	// chrome.storage.local.set({'password': ""});
 	// chrome.storage.local.set({'logged': false});
 	// chrome.storage.local.set({'userId': ""});
+	// chrome.storage.local.set({'token': ""});
 
 
 
@@ -73,13 +74,14 @@ function generete_popup_html( url)
 
 	
 	
-	chrome.storage.local.get(['logged', 'email' , 'password', 'userId'], function(data){
+	chrome.storage.local.get(['logged', 'email' , 'password', 'userId', 'token'], function(data){
 		logged = data.logged;
 		email = data.email;
 		password = data.password;
 		userid = data.userId;
+		token = data.token;
 		
-		console.log('We currently have saved data logged=' + logged + " email=" + email + " userid=" + userid);
+		console.log('We currently have saved data logged=' + logged + " email=" + email + " userid=" + userid + " token="+token);
 
 		if(logged  == false)
 		{
@@ -264,6 +266,7 @@ function logout_fct()
 	chrome.storage.local.set({'password': ""});
 	chrome.storage.local.set({'logged': false});
 	chrome.storage.local.set({'userId': ""});
+	chrome.storage.local.set({'token': ""});
 	
 	clear_html_containers();
 
@@ -376,16 +379,35 @@ function send_login_data( email, password , registered )
         // parse JSON data
         console.log(JSON.parse(xhttp.response));
         // console.log(xhttp.getResponseHeader('Set-Cookie'));
+	
+		chrome.storage.local.set({'email': email});
+		chrome.storage.local.set({'password': password});
+		chrome.storage.local.set({'logged': true});
+		chrome.storage.local.set({'userId': 49});//This is hardcoded and only work for our user & TO DO : We have to ask http://sma-a4.herokuapp.com/token to obtain the token and decrypted to obtain the user Id
+		console.log('We save data email = ' + email +' logged '+ true);
 		
-			chrome.storage.local.set({'email': email});
-			chrome.storage.local.set({'password': password});
-			chrome.storage.local.set({'logged': true});
-			chrome.storage.local.set({'userId': 49});//This is hardcoded and only work for our user & TO DO : We have to ask http://sma-a4.herokuapp.com/token to obtain the token and decrypted to obtain the user Id
-			
-			console.log('We save data email = ' + email +' logged '+ true);
-			clear_html_containers();
-			generete_popup_html( url);
-		//
+		var xhttp2 = new XMLHttpRequest();// build a HTTP request to login a user via red team API 
+		xhttp2.open("GET", "http://sma-a4.herokuapp.com/token", true);
+		xhttp2.send();
+		xhttp2.onload = () => {
+			// process response
+			if (xhttp2.status == 200)//TODO: Check errors and body response message
+			{
+				console.log("We get the token also: "+ JSON.parse(xhttp2.response).token);
+				token = JSON.parse(xhttp2.response).token;
+				chrome.storage.local.set({'token': JSON.parse(xhttp2.response).token});
+			}
+			else
+			{
+				document.getElementById("authorize_div").innerHTML = ' '+
+										'<p> Token Error : '+xhttp2.response+'</p>';
+					console.error('Error!');
+			}
+		};
+		
+		clear_html_containers();
+		generete_popup_html( url);
+
     }
 	else
 	{
@@ -441,7 +463,7 @@ async function post_on_platform(post_platform, message)
 					
 					
 				}
-				if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
+				else if (message.data.post_imgs[i].substring(0,30).match('^blob:http'))
 				{
 					console.log("Image with blob+url -> tranform it in file");
 
@@ -462,6 +484,7 @@ async function post_on_platform(post_platform, message)
 				}
 				else
 				{
+					console.log("Image with  normal url");
 					if(post_platform == "linkedin"){formData_li.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
 					if(post_platform == "tumblr"){formData_tu.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
 					if(post_platform == "twitter"){formData_tw.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
@@ -550,7 +573,8 @@ async function post_on_platform(post_platform, message)
 							{
 								string_post_fl += "&mesaj=";
 							}
-							string_post_fl += "&userid=" + userid + "&submit=PostImage";
+							// string_post_fl += "&userid=" + userid + "&submit=PostImage";
+							string_post_fl += "&jwt=" + token + "&submit=PostImage";
 						}
 						console.log("fb string="+string_post_fb +" fl string="+string_post_fl);
 					}
@@ -587,7 +611,8 @@ async function post_on_platform(post_platform, message)
 				if((post_platform == "flickr"))
 				{
 					string_post_fl += "&image="+encodeURIComponent(url_without_blob);
-					string_post_fl += "&message="+encodeURIComponent(message.data.post_text)+"&userid=" + userid + "&submit=PostImage";
+					// string_post_fl += "&message="+encodeURIComponent(message.data.post_text)+"&userid=" + userid + "&submit=PostImage";
+					string_post_fl += "&message="+encodeURIComponent(message.data.post_text)+"&jwt=" + token + "&submit=PostImage";
 					post_yellow_team(string_post_fl , post_platform);
 				}
 				
@@ -626,7 +651,8 @@ async function post_on_platform(post_platform, message)
 					{
 						string_post_fl += "&message= ";
 					}
-					string_post_fl += "&userid=" + userid + "&submit=PostImage";
+					// string_post_fl += "&userid=" + userid + "&submit=PostImage";
+					string_post_fl += "&jwt=" + token + "&submit=PostImage";
 					post_yellow_team(string_post_fl , post_platform);
 				}
 			}
@@ -687,9 +713,9 @@ function post_red_team(post_platform, formData)
 			}
 			else
 			{
-				console.error('Error!'+xhttp.response);
+				console.error('Error!'+xhttp.status);
 				document.getElementById("authorize_div").innerHTML += ' '+
-							'<p> Post error for ' + post_platform + '  </p>';
+							'<p> Post error for ' + post_platform + " code="+ xhttp.status+ '  </p>';
 				
 			}
 		}
@@ -716,9 +742,9 @@ function post_yellow_team(string_post , post_platform)
 			}
 			else 
 			{
-					console.error('Error!'+xhttp.response);
+					console.error('Post error for ' + post_platform + " code="+ xhttp.status);
 					document.getElementById("authorize_div").innerHTML += ' '+
-								'<p> Post error for ' + post_platform + '  </p>';
+								'<p> Post error for ' + post_platform + " code="+ xhttp.status+ '  </p>';
 			}
 		};
 	}
@@ -814,12 +840,15 @@ function authorize_request(clicked_platform)
 		{
 			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid="+userid;	
 			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid=69420";//Hardcoded. Yellow team have problems.
-			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+			// check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&jwt="+token+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		}
 		if(clicked_platform == "flickr")
 		{
-			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=getAccountName&userid="+userid;
-			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=login&userid="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=getAccountName&userid="+userid;
+			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=getAccountName&jwt="+token;
+			// check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=login&userid="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/DPZ/REST.php?do=login&jwt="+token+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		} 
 		
 		
@@ -954,7 +983,7 @@ async function transform_file_in_imgur_url(image_file, string_post_fb, string_po
 		else 
 		{
 
-			console.error('Error!'+xhttp.response);
+			console.error('Error!'+xhttp.status);
 			imgur_url =  "error";
 			callback(imgur_url, string_post_fb, string_post_fl);
 			
@@ -989,6 +1018,7 @@ async function blob_to_data(bloburl)
 	await xhr.send();
 	return blobAsDataUrl;
 }
-
+//TO DO : Allow multiple linkedin/facebook pages. We have to make select on wich of page to post. 
+//TO DO : Integreate jwt token
 //TO DO : Check if users are authetificated and ask for login if not;
 //TO DO : dinamicaly check if a user open a post in a social platfom

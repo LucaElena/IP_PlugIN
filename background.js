@@ -41,6 +41,12 @@ chrome.runtime.onMessage.addListener(
             console.log('Am primit intrebare :' + request.txt);
 
 			chrome.tabs.create({ url: request.data.url });
+        }
+		
+		if (request.txt === "send_login_url")
+		{
+            console.log('Am primit intrebare :' + request.txt);
+			// chrome.tabs.create({ url: request.data.url });
 
         }
 		// error with port closed
