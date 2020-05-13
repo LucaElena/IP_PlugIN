@@ -2,7 +2,7 @@
 // "default_popup": "popup.html"
 
 
-let social_pages_included = ['facebook', 'flickr', 'twitter', 'tumblr', 'linkedin'];
+let social_pages_included = ['facebook_m', 'flickr', 'twitter', 'tumblr', 'linkedin'];
 img_instagram = '<object class="social_icon" type="image/svg+xml" data="instagram.svg "></object>';
 img_flickr = '<object class="social_icon" type="image/svg+xml" data="flickr.svg "></object>';
 img_twitter = '<object class="social_icon" type="image/svg+xml" data="twitter.svg "></object>';
@@ -114,7 +114,37 @@ function generete_popup_html( url)
 			{
 				 
 				document.getElementById("social_on_div").innerHTML = '<p align=center>Currently on: </p>' + current_img; 
-				document.getElementById("share_on_div").innerHTML = '<div><p align=center>You may also want to share your post here: </p>' + generete_share_on_html(current_social_page) +'</div>'; 
+				// document.getElementById("share_on_div").innerHTML = '<div><p align=center>You may also want to share your post here(default pages): </p>' + generete_share_on_html(current_social_page) +'</div>'; 
+				document.getElementById("share_on_div").innerHTML = '<div><p align=center>You may also want to share your post here(default pages): </p>' + generete_share_on_html(current_social_page)+'</div>'; 
+				document.getElementById("share_on_div2").innerHTML = '<div><p align=center>Or select other possible pages instead of default page: </p></div>';
+				document.getElementById("share_on_div3").innerHTML += '<div'+ 'id="list_linkedin" class="dropdown-check-list" tabindex="100">'+
+					'<span class="anchor_li">Linkedin</span>'+
+					'<ul id="items_linkedin" class="items_li">'+
+						'<li><input type="checkbox" />PageA </li>'+
+						'<li><input type="checkbox" />PageB</li>'+
+						'<li><input type="checkbox" />PageC </li>'+
+					'</ul>'+
+				'</div>';
+				document.getElementById("share_on_div4").innerHTML += '<div id="list_tumblr" class="dropdown-check-list" tabindex="100">'+
+					'<span class="anchor_tu">Tumbr</span>'+
+					'<ul id="items_tumblr" class="items_tu">'+
+						'<li><input type="checkbox" />PageA </li>'+
+						'<li><input type="checkbox" />PageB</li>'+
+						'<li><input type="checkbox" />PageC </li>'+
+						'<li><input type="checkbox" />PageD </li>'+
+					'</ul>'+
+				'</div>';
+				document.getElementById("share_on_div5").innerHTML += '<div id="list_facebook" class="dropdown-check-list" tabindex="100">'+
+					'<span class="anchor_fb">Facebook</span>'+
+					'<ul id="items_facebook" class="items_fb">'+
+						'<li><input type="checkbox" />PageA </li>'+
+						'<li><input type="checkbox" />PageB</li>'+
+						'<li><input type="checkbox" />PageC </li>'+
+						'<li><input type="checkbox" />PageD </li>'+
+						'<li><input type="checkbox" />PageE </li>'+
+					'</ul>'+
+				'</div>';
+				
 				document.getElementById("post_it_div").innerHTML = '<input class="general_class_btn" id="postit_btn" type="submit" value="Post IT" >'; 
 				
 				//get post data from current social platfom
@@ -549,6 +579,13 @@ async function post_on_platform(post_platform, message)
 					if (post_platform == "facebook")
 					{
 						string_post_fb += "&image=" + encodeURIComponent(imgur_urls[0]);
+						if(imgur_urls.length >= 2)
+						{
+							for (var i = 1; i < imgur_urls.length; i++)
+							{
+								string_post_fb += "+" + encodeURIComponent(imgur_urls[i]);
+							}
+						}
 						if(message.data.post_text != "")
 						{
 							string_post_fb += "&mesaj="+encodeURIComponent(message.data.post_text);
@@ -557,7 +594,8 @@ async function post_on_platform(post_platform, message)
 						{
 							string_post_fb += "&mesaj=";
 						}
-						string_post_fb += "&fbid=69420&submit=Image";
+						// string_post_fb += "&fbid="+userid+"&submit=Image";
+						string_post_fb += "&jwt="+token+"&submit=Image";
 					}
 					if((post_platform == "flickr"))
 					{
@@ -669,7 +707,8 @@ async function post_on_platform(post_platform, message)
 					{
 						string_post_fb += "&mesaj= ";
 					}
-					string_post_fb += "&fbid=69420&submit=Image";
+					// string_post_fb += "&fbid="+userid+"&submit=Image";
+					string_post_fb += "&jwt="+token+"&submit=Image";
 					post_yellow_team(string_post_fb , post_platform);
 				}
 				else if((post_platform == "flickr"))
@@ -703,7 +742,8 @@ async function post_on_platform(post_platform, message)
 			{ 
 				if (string_post_fl == "facebook")
 				{
-					string_post_fl += "&messenger="+encodeURIComponent(message.data.post_text)+"&fbid=69420&submit=Message";//bug from yellow team-> only some user work
+					// string_post_fl += "&messenger="+encodeURIComponent(message.data.post_text)+"&fbid="+userid+"&submit=Message";//bug from yellow team-> only some user work
+					string_post_fl += "&messenger="+encodeURIComponent(message.data.post_text)+"&jwt="+token+"&submit=Message";//bug from yellow team-> only some user work
 					post_yellow_team(string_post_fl , post_platform);
 				}
 				else if((post_platform == "flickr"))
@@ -887,10 +927,11 @@ function authorize_request(clicked_platform)
 
 		if(clicked_platform == "facebook")
 		{
-			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid="+userid;	
-			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid=69420";//Hardcoded. Yellow team have problems.
+			// check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&fbid="+userid;//Hardcoded. Yellow team have problems. Resolved	
+			check_profile_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getUserName&jwt="+token;
 			// check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
-			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId=69420&redirect=https%3A%2F%2Fwww.google.com%2F";
+			// check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&userId="+userid+"&redirect=https%3A%2F%2Fwww.google.com%2F";
+			check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&jwt="+token+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 			// check_auth_url = "https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=login&jwt="+token+"&redirect=https%3A%2F%2Fwww.google.com%2F";
 		}
 		if(clicked_platform == "flickr")
@@ -1158,9 +1199,10 @@ async function blob_to_data(bloburl)
 
 
 
-//TO DO : Allow multiple linkedin/facebook pages. We have to make select on wich of page to post. 
-//TO DO : Integreate jwt token - almost done
-//TO DO : Paralel blob/base64data transform in files/urls
-//TO DO : Flickr multiple images
+//TO DO : Allow multiple linkedin/facebook/tumblr pages. We have to make select on wich of page to post. 
+//TO DO : Integreate jwt token - done(flick/fb)
+//TO DO : Paralel blob/base64data transform in files/urls - done
+//TO DO : Flickr multiple images - done
+//TO DO : Facebook multiple images +
 //TO DO : Check if users are authetificated and ask for login if not;
 //TO DO : Dinamicaly check if a user open a post in a social platfom
