@@ -1,3 +1,6 @@
+p { margin:2px }
+div { margin:0 }
+
 .body_all
 {
 	font-size: 15px;
@@ -6,9 +9,9 @@
 	width: 220px;
 	background: #fff;
 	font-family: Times, "Times New Roman", serif;
-	border: 1px;
+	border: 0px;
 	margin: 0px;
-	padding: 5px;
+	padding: 0px;
 	border-style: outset;
 }
 
@@ -45,6 +48,7 @@
 {
   display: flex;
   flex-wrap: nowrap;
+  margin:5px;
 }
 
 .flex-container > div
@@ -53,6 +57,7 @@
   margin: 10px;
   text-align: center;
   line-height: 25px;  
+  margin:5px;
 }
 
 
@@ -120,30 +125,30 @@
   position: relative;
   cursor: pointer;
   display: inline-block;
-  padding: 5px 50px 5px 10px;
-  border: 1px solid #ccc;
+  padding: 2px 10px 2px 2px;
+  border: 0px solid #ccc;
 }
 .dropdown-check-list .anchor_tu {
   position: relative;
   cursor: pointer;
   display: inline-block;
-  padding: 5px 50px 5px 10px;
-  border: 1px solid #ccc;
+  padding: 2px 10px 2px 2px;
+  border: 0px solid #ccc;
 }
 .dropdown-check-list .anchor_fb {
   position: relative;
   cursor: pointer;
   display: inline-block;
-  padding: 5px 50px 5px 10px;
-  border: 1px solid #ccc;
+  padding: 2px 10px 2px 2px;
+  border: 0px solid #ccc;
 }
 .dropdown-check-list .anchor_fb:after {
   position: absolute;
   content: "";
-  border-left: 2px solid black;
-  border-top: 2px solid black;
-  padding: 5px;
-  right: 10px;
+  border-left: 1px solid black;
+  border-top: 1px solid black;
+  padding: 2px;
+  right: 5px;
   top: 20%;
   -moz-transform: rotate(-135deg);
   -ms-transform: rotate(-135deg);
@@ -154,10 +159,10 @@
 .dropdown-check-list .anchor_li:after {
   position: absolute;
   content: "";
-  border-left: 2px solid black;
-  border-top: 2px solid black;
-  padding: 5px;
-  right: 10px;
+  border-left: 1px solid black;
+  border-top: 1px solid black;
+  padding: 2px;
+  right: 5px;
   top: 20%;
   -moz-transform: rotate(-135deg);
   -ms-transform: rotate(-135deg);
@@ -168,10 +173,10 @@
 .dropdown-check-list .anchor_tu:after {
   position: absolute;
   content: "";
-  border-left: 2px solid black;
-  border-top: 2px solid black;
-  padding: 5px;
-  right: 10px;
+  border-left: 1px solid black;
+  border-top: 1px solid black;
+  padding: 2px;
+  right: 5px;
   top: 20%;
   -moz-transform: rotate(-135deg);
   -ms-transform: rotate(-135deg);
@@ -180,15 +185,15 @@
   transform: rotate(-135deg);
 }
 .dropdown-check-list .anchor_li:active:after {
-  right: 8px;
+  right: 6px;
   top: 21%;
 }
 .dropdown-check-list .anchor_tu:active:after {
-  right: 8px;
+  right: 6px;
   top: 21%;
 }
 .dropdown-check-list .anchor_fb:active:after {
-  right: 8px;
+  right: 6px;
   top: 21%;
 }
 .dropdown-check-list ul.items_li {

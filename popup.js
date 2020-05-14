@@ -2,7 +2,7 @@
 // "default_popup": "popup.html"
 
 
-let social_pages_included = ['facebook_m', 'flickr', 'twitter', 'tumblr', 'linkedin'];
+let social_pages_included = ['facebook', 'flickr', 'twitter', 'tumblr', 'linkedin'];
 img_instagram = '<object class="social_icon" type="image/svg+xml" data="instagram.svg "></object>';
 img_flickr = '<object class="social_icon" type="image/svg+xml" data="flickr.svg "></object>';
 img_twitter = '<object class="social_icon" type="image/svg+xml" data="twitter.svg "></object>';
@@ -33,6 +33,9 @@ let base64data_urls = [];
 	// chrome.storage.local.set({'logged': false});
 	// chrome.storage.local.set({'userId': ""});
 	// chrome.storage.local.set({'token': ""});
+	// chrome.storage.local.set({'fb_pages': ""});
+	// chrome.storage.local.set({'li_pages': ""});
+	// chrome.storage.local.set({'tu_pages': ""});
 
 
 
@@ -80,14 +83,17 @@ function generete_popup_html( url)
 
 	
 	
-	chrome.storage.local.get(['logged', 'email' , 'password', 'userId', 'token'], function(data){
+	chrome.storage.local.get(['logged', 'email' , 'password', 'userId', 'token', 'fb_pages', 'li_pages', 'tu_pages'], function(data){
 		logged = data.logged;
 		email = data.email;
 		password = data.password;
 		userid = data.userId;
 		token = data.token;
+		fb_pages = data.fb_pages;
+		li_pages = data.li_pages;
+		tu_pages = data.tu_pages;
 		
-		console.log('We currently have saved data logged=' + logged + " email=" + email + " userid=" + userid + " token="+token);
+		console.log('We currently have saved data logged=' + logged + " email=" + email + " userid=" + userid + " token=" + token + " fb_pages=" + fb_pages + " li_pages=" + li_pages + " tu_pages=" + tu_pages);
 
 		if(logged  == false)
 		{
@@ -115,35 +121,85 @@ function generete_popup_html( url)
 				 
 				document.getElementById("social_on_div").innerHTML = '<p align=center>Currently on: </p>' + current_img; 
 				// document.getElementById("share_on_div").innerHTML = '<div><p align=center>You may also want to share your post here(default pages): </p>' + generete_share_on_html(current_social_page) +'</div>'; 
-				document.getElementById("share_on_div").innerHTML = '<div><p align=center>You may also want to share your post here(default pages): </p>' + generete_share_on_html(current_social_page)+'</div>'; 
-				document.getElementById("share_on_div2").innerHTML = '<div><p align=center>Or select other possible pages instead of default page: </p></div>';
-				document.getElementById("share_on_div3").innerHTML += '<div'+ 'id="list_linkedin" class="dropdown-check-list" tabindex="100">'+
+				document.getElementById("share_on_div").innerHTML = '<div><p align=center>Post here(default page): </p>' + generete_share_on_html(current_social_page)+'</div>'; 
+				document.getElementById("share_on_div2").innerHTML = '<div><p align=center>Select other possible pages you own: </p></div>';
+				
+				document.getElementById("share_on_div3").innerHTML += '<div '+
+				'id="list_linkedin" class="dropdown-check-list" tabindex="100">'+
 					'<span class="anchor_li">Linkedin</span>'+
-					'<ul id="items_linkedin" class="items_li">'+
-						'<li><input type="checkbox" />PageA </li>'+
-						'<li><input type="checkbox" />PageB</li>'+
-						'<li><input type="checkbox" />PageC </li>'+
+					'<ul id="items_linkedin" class="items_li">'+generete_sharemultiple_on_html(li_pages,"linkedin")+
 					'</ul>'+
 				'</div>';
 				document.getElementById("share_on_div4").innerHTML += '<div id="list_tumblr" class="dropdown-check-list" tabindex="100">'+
 					'<span class="anchor_tu">Tumbr</span>'+
-					'<ul id="items_tumblr" class="items_tu">'+
-						'<li><input type="checkbox" />PageA </li>'+
-						'<li><input type="checkbox" />PageB</li>'+
-						'<li><input type="checkbox" />PageC </li>'+
-						'<li><input type="checkbox" />PageD </li>'+
+					'<ul id="items_tumblr" class="items_tu">'+generete_sharemultiple_on_html(tu_pages,"tumblr")+
 					'</ul>'+
 				'</div>';
 				document.getElementById("share_on_div5").innerHTML += '<div id="list_facebook" class="dropdown-check-list" tabindex="100">'+
 					'<span class="anchor_fb">Facebook</span>'+
-					'<ul id="items_facebook" class="items_fb">'+
-						'<li><input type="checkbox" />PageA </li>'+
-						'<li><input type="checkbox" />PageB</li>'+
-						'<li><input type="checkbox" />PageC </li>'+
-						'<li><input type="checkbox" />PageD </li>'+
-						'<li><input type="checkbox" />PageE </li>'+
+					'<ul id="items_facebook" class="items_fb">'+generete_sharemultiple_on_html(fb_pages,"facebook")+
 					'</ul>'+
 				'</div>';
+				
+				// code to control the dropdown buttons
+				var checkList_li = document.getElementById('list_linkedin');
+				var items_li = document.getElementById('items_linkedin');
+				checkList_li.getElementsByClassName('anchor_li')[0].onclick = function (evt){
+					if (items_li.classList.contains('visible'))
+					{
+						items_li.classList.remove('visible');
+						items_li.style.display = "none";
+					}
+					else
+					{
+						items_li.classList.add('visible');
+						items_li.style.display = "block";
+					}
+				}
+				items_li.onblur = function(evt)
+				{
+					items_li.classList.remove('visible');
+				}
+				
+				
+				var checkList_tu = document.getElementById('list_tumblr');
+				var items_tu = document.getElementById('items_tumblr');
+				checkList_tu.getElementsByClassName('anchor_tu')[0].onclick = function (evt){
+					if (items_tu.classList.contains('visible'))
+					{
+						items_tu.classList.remove('visible');
+						items_tu.style.display = "none";
+					}
+					else
+					{
+						items_tu.classList.add('visible');
+						items_tu.style.display = "block";
+					}
+				}
+				items_tu.onblur = function(evt)
+				{
+					items_tu.classList.remove('visible');
+				}
+				
+				var checkList_fb = document.getElementById('list_facebook');
+				var items_fb = document.getElementById('items_facebook');
+				checkList_fb.getElementsByClassName('anchor_fb')[0].onclick = function (evt){
+					if (items_fb.classList.contains('visible'))
+					{
+						items_fb.classList.remove('visible');
+						items_fb.style.display = "none";
+					}
+					else
+					{
+						items_fb.classList.add('visible');
+						items_fb.style.display = "block";
+					}
+				}
+				items_fb.onblur = function(evt)
+				{
+					items_fb.classList.remove('visible');
+				}
+				// end code to control the dropdown buttons
 				
 				document.getElementById("post_it_div").innerHTML = '<input class="general_class_btn" id="postit_btn" type="submit" value="Post IT" >'; 
 				
@@ -293,18 +349,49 @@ function postit_fct(current_platorm,message)
 
 	for (key in social_pages_included) 
 	{
+		//default page
 		if (social_pages_included[key] != current_social_page)
 		{
-			checkbox = "checkbox_"+social_pages_included[key];
-			console.log('Selected platforms ' + social_pages_included[key] + ' value = ' + document.getElementById(checkbox).checked);
-			if(document.getElementById(checkbox).checked === true)
+			checkbox_default = "checkbox_"+social_pages_included[key];
+			console.log('Selected default page from platform ' + social_pages_included[key] + ' value = ' + document.getElementById(checkbox_default).checked);
+			if(document.getElementById(checkbox_default).checked === true)
 			{
-				//post data on al selected social platforms
-				// TO DO : post text + images via API
 				console.log('Start post on '+social_pages_included[key]);
 				post_on_platform(social_pages_included[key],message);
 			}
-			
+		}
+		
+		//multi pages from fb/tu/li
+		// This platforms allow multi_pages for same user
+		if (social_pages_included[key] == "linkedin")
+		{
+			var pagesArr = li_pages.split(';');
+			for (i = 1; i < pagesArr.length ; i++)
+			{
+				checkbox_multi = "checkbox_linkedin_"+pagesArr[i];
+				console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+				// post_on_platform(pagesArr[key],message);
+			}
+		}
+		if (social_pages_included[key] == "tumblr")
+		{
+			var pagesArr = tu_pages.split(';');
+			for (i = 1; i < pagesArr.length ; i++)
+			{
+				checkbox_multi = "checkbox_tumblr_"+pagesArr[i];
+				console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = ' + document.getElementById(checkbox_multi).checked);
+				// post_on_platform(pagesArr[key],message);
+			}
+		}
+		if (social_pages_included[key] == "facebook")
+		{
+			var pagesArr = fb_pages.split(';');
+			for (i = 1; i < pagesArr.length ; i++)
+			{//<input type="checkbox" id="checkbox_facebook_104962884545049">
+				checkbox_multi = "checkbox_facebook_"+pagesArr[i];
+				console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+				// post_on_platform(pagesArr[key],message);
+			}
 		}
 	}
 	
@@ -322,6 +409,9 @@ function logout_fct()
 	chrome.storage.local.set({'logged': false});
 	chrome.storage.local.set({'userId': ""});
 	chrome.storage.local.set({'token': ""});
+	chrome.storage.local.set({'fb_pages': ""});//Here we could have multiple pages
+	chrome.storage.local.set({'li_pages': ""});//Here we could have multiple pages
+	chrome.storage.local.set({'tu_pages': ""});//Here we could have multiple pages
 	
 	clear_html_containers();
 
@@ -459,6 +549,35 @@ function send_login_data( email, password , registered )
 				console.log("Decoden user_id="+decoded.user_id);
 				chrome.storage.local.set({'userId': decoded.user_id});
 				userid=decoded.user_id;
+				
+				
+				var xhttp5 = new XMLHttpRequest();
+				xhttp5.open("GET", "http://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getPages&jwt="+token, true);
+				xhttp5.setRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+				xhttp5.send();
+				
+				xhttp5.onload = () => {
+					// process response
+					if (xhttp5.status == 200)//TODO: Check errors and body response message
+					{
+						
+						let pages = JSON.parse(xhttp5.response).PAGE_IDS
+						console.log("We get the facebook pages also: "+ pages);
+						fb_pages = "";
+						for (var i = 0; i < pages.length; i++)
+						{
+							fb_pages += ";"+pages[i];
+						}
+						chrome.storage.local.set({'fb_pages': fb_pages});
+					}
+					else
+					{
+						document.getElementById("authorize_div").innerHTML = ' '+
+												'<p> Get Facebook get pages Error : '+xhttp5.status+xhttp5.response+'</p>';
+							console.error('Error!');
+					}
+				};
+						
 			}
 			else
 			{
@@ -467,6 +586,62 @@ function send_login_data( email, password , registered )
 					console.error('Error!');
 			}
 		};
+		
+		var xhttp3 = new XMLHttpRequest();
+		xhttp3.open("GET", "http://sma-a4.herokuapp.com/linkedin/profile", true);
+		xhttp3.send();
+		
+		xhttp3.onload = () => {
+			// process response
+			if (xhttp3.status == 200)//TODO: Check errors and body response message
+			{
+				
+				let pages = JSON.parse(xhttp3.response).pages
+				console.log("We get the linkedin pages also: "+ pages);
+				li_pages = "";
+				for (var i = 0; i < pages.length; i++)
+				{
+					li_pages += ";"+pages[i];
+				}
+				chrome.storage.local.set({'li_pages': li_pages});
+			}
+			else
+			{
+				document.getElementById("authorize_div").innerHTML = ' '+
+										'<p> Get Linkedin get pages Error : '+xhttp3.status+xhttp3.response+'</p>';
+					console.error('Error!');
+			}
+		};
+		
+		var xhttp4 = new XMLHttpRequest();
+		xhttp4.open("GET", "http://sma-a4.herokuapp.com/tumblr/profile", true);
+		xhttp4.send();
+		
+		xhttp4.onload = () => {
+			// process response
+			if (xhttp4.status == 200)//TODO: Check errors and body response message
+			{
+				
+				let pages = JSON.parse(xhttp4.response).pages
+				console.log("We get the tumblr pages also: "+ pages);
+				tu_pages = "";
+				for (var i = 0; i < pages.length; i++)
+				{
+					tu_pages += ";"+pages[i];
+				}
+				chrome.storage.local.set({'tu_pages': tu_pages});
+			}
+			else
+			{
+				document.getElementById("authorize_div").innerHTML = ' '+
+										'<p> Get Tumblr get pages Error : '+xhttp4.status+xhttp4.response+'</p>';
+					console.error('Error!');
+			}
+		};
+		
+		
+		
+		
 		
 		clear_html_containers();
 		generete_popup_html( url);
@@ -560,7 +735,14 @@ async function post_on_platform(post_platform, message)
 		{
 			if (post_platform == "facebook")
 			{
-				string_post_fb += "PostImage";
+				if(message.data.post_imgs.length >= 2)
+				{
+					string_post_fb += "MultipleImage";
+				}
+				else
+				{
+					string_post_fb += "PostImage";
+				}
 			}
 			if((post_platform == "flickr"))
 			{
@@ -583,7 +765,7 @@ async function post_on_platform(post_platform, message)
 						{
 							for (var i = 1; i < imgur_urls.length; i++)
 							{
-								string_post_fb += "+" + encodeURIComponent(imgur_urls[i]);
+								string_post_fb += "%2B" + encodeURIComponent(imgur_urls[i]);
 							}
 						}
 						if(message.data.post_text != "")
@@ -594,8 +776,16 @@ async function post_on_platform(post_platform, message)
 						{
 							string_post_fb += "&mesaj=";
 						}
-						// string_post_fb += "&fbid="+userid+"&submit=Image";
-						string_post_fb += "&jwt="+token+"&submit=Image";
+						if(message.data.post_imgs.length >= 2)
+						{
+							string_post_fb += "&jwt="+token+"&submit=MultipleImage";
+						}
+						else
+						{
+							// string_post_fb += "&fbid="+userid+"&submit=Image";
+							string_post_fb += "&jwt="+token+"&submit=Image";
+						}
+						
 					}
 					if((post_platform == "flickr"))
 					{
@@ -1121,6 +1311,10 @@ function clear_html_containers()
 	document.getElementById("authorize_div").innerHTML = '';
 	document.getElementById("social_on_div").innerHTML = '';
 	document.getElementById("share_on_div").innerHTML = '';
+	document.getElementById("share_on_div2").innerHTML = '';
+	document.getElementById("share_on_div3").innerHTML = '';
+	document.getElementById("share_on_div4").innerHTML = '';
+	document.getElementById("share_on_div5").innerHTML = '';
 	document.getElementById("post_it_div").innerHTML = '';
 	document.getElementById("you_want_to_share_txt_div").innerHTML = '';
 	document.getElementById("you_want_to_share_media_div").innerHTML = '';
@@ -1195,6 +1389,19 @@ async function blob_to_data(bloburl)
 	return blobAsDataUrl;
 }
 
+function generete_sharemultiple_on_html(multi_pages,platfom)
+{
+	var multi_pagesArr = multi_pages.split(';');
+	var input_string = "";
+	for (var i = 1; i < multi_pagesArr.length; i++)
+	{
+		input_string += '<li><input type="checkbox" id="checkbox_'+platfom+'_'+multi_pagesArr[i]+'"/>'+ multi_pagesArr[i]+'</li>'
+	}
+	return input_string;
+}
+
+
+
 
 
 
@@ -1203,6 +1410,6 @@ async function blob_to_data(bloburl)
 //TO DO : Integreate jwt token - done(flick/fb)
 //TO DO : Paralel blob/base64data transform in files/urls - done
 //TO DO : Flickr multiple images - done
-//TO DO : Facebook multiple images +
+//TO DO : Facebook multiple images - done 
 //TO DO : Check if users are authetificated and ask for login if not;
 //TO DO : Dinamicaly check if a user open a post in a social platfom
