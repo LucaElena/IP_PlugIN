@@ -21,6 +21,10 @@ const sleep = ms => new Promise(res => setTimeout(res, ms));
 string_post_fb = "";
 string_post_fl = "";
 string_post = "";
+var default_page_fb = 0;
+var default_page_li = 0;
+var default_page_tu = 0;
+
 var formData_li;
 var formData_tw;
 var formData_tu;
@@ -332,13 +336,6 @@ function postit_fct(current_platorm,message)
 	{ 
 		console.log('Txt data we have to post =' + message.data.post_text);
 	}
-	if(message.data.post_imgs != "")
-	{
-		for (var i = 0; i < message.data.post_imgs.length; i++)
-		{
-			console.log('Img data we have to post =' + message.data.post_imgs[i]);
-		}
-	}
 	if(message.data.post_videos != "")
 	{
 		for (var i = 0; i < message.data.post_videos.length; i++)
@@ -346,55 +343,156 @@ function postit_fct(current_platorm,message)
 			console.log('Video data we have to post =' + message.data.post_videos[i]);
 		}
 	}
-
-	for (key in social_pages_included) 
+	if(message.data.post_imgs != "")
 	{
-		//default page
-		if (social_pages_included[key] != current_social_page)
-		{
-			checkbox_default = "checkbox_"+social_pages_included[key];
-			console.log('Selected default page from platform ' + social_pages_included[key] + ' value = ' + document.getElementById(checkbox_default).checked);
-			if(document.getElementById(checkbox_default).checked === true)
+		// for (var i = 0; i < message.data.post_imgs.length; i++)
+		// {
+			if(message.data.post_imgs[0].substring(0,30).match('^data:image\/(.*);base64,'))
+			{//We have images in base64data -> tranform them in urls only once -> not for each page/platform
+				console.log("Image with data...base64 instead of url ->TO DO:tranform it in url somehow(imgur)");
+				parallelizeTrasformBase64dataInUrl(message.data.post_imgs, loopFnTransformInImgur, function(){
+					console.log('Done transforming all base64datas to urls');
+					for (var i = 0; i < imgur_urls.length; i++)
+					{
+						console.log('Img data we have to post =' + imgur_urls[i]);
+						message.data.post_imgs[i] = imgur_urls[i];
+					}
+					imgur_urls = [];
+					
+					for (key in social_pages_included) 
+					{
+						//default page
+						if (social_pages_included[key] != current_social_page)
+						{
+							checkbox_default = "checkbox_"+social_pages_included[key];
+							console.log('Selected default page from platform ' + social_pages_included[key] + ' value = ' + document.getElementById(checkbox_default).checked);
+							if(document.getElementById(checkbox_default).checked === true)
+							{
+								console.log('Start post on '+social_pages_included[key]);
+								post_on_platform(social_pages_included[key],message);
+							}
+						}
+						
+						//multi pages from fb/tu/li
+						// This platforms allow multi_pages for same user
+						if (social_pages_included[key] == "linkedin")
+						{
+							var pagesArr = li_pages.split(';');
+							for (i = 1; i < pagesArr.length ; i++)
+							{
+								checkbox_multi = "checkbox_linkedin_"+pagesArr[i];
+								console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+								
+								if(document.getElementById(checkbox_multi).checked === true)
+								{
+									console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+									post_on_platform(checkbox_multi,message);
+								}
+							}
+						}
+						if (social_pages_included[key] == "tumblr")
+						{
+							var pagesArr = tu_pages.split(';');
+							for (i = 1; i < pagesArr.length ; i++)
+							{
+								checkbox_multi = "checkbox_tumblr_"+pagesArr[i];
+								console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = ' + document.getElementById(checkbox_multi).checked);
+								
+								if(document.getElementById(checkbox_multi).checked === true)
+								{
+									console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+									post_on_platform(checkbox_multi,message);
+								}
+							}
+						}
+						if (social_pages_included[key] == "facebook")
+						{
+							var pagesArr = fb_pages.split(';');
+							for (i = 1; i < pagesArr.length ; i++)
+							{//<input type="checkbox" id="checkbox_facebook_104962884545049">
+								checkbox_multi = "checkbox_facebook_"+pagesArr[i];
+								console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+								
+								if(document.getElementById(checkbox_multi).checked === true)
+								{
+									console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+									post_on_platform(checkbox_multi,message);
+								}
+							}
+						}
+					}
+					
+				});
+			}
+			else
 			{
-				console.log('Start post on '+social_pages_included[key]);
-				post_on_platform(social_pages_included[key],message);
+		// }
+	// }
+
+				for (key in social_pages_included) 
+				{
+					//default page
+					if (social_pages_included[key] != current_social_page)
+					{
+						checkbox_default = "checkbox_"+social_pages_included[key];
+						console.log('Selected default page from platform ' + social_pages_included[key] + ' value = ' + document.getElementById(checkbox_default).checked);
+						if(document.getElementById(checkbox_default).checked === true)
+						{
+							console.log('Start post on '+social_pages_included[key]);
+							post_on_platform(social_pages_included[key],message);
+						}
+					}
+					
+					//multi pages from fb/tu/li
+					// This platforms allow multi_pages for same user
+					if (social_pages_included[key] == "linkedin")
+					{
+						var pagesArr = li_pages.split(';');
+						for (i = 1; i < pagesArr.length ; i++)
+						{
+							checkbox_multi = "checkbox_linkedin_"+pagesArr[i];
+							console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+							
+							if(document.getElementById(checkbox_multi).checked === true)
+							{
+								console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+								post_on_platform(checkbox_multi,message);
+							}
+						}
+					}
+					if (social_pages_included[key] == "tumblr")
+					{
+						var pagesArr = tu_pages.split(';');
+						for (i = 1; i < pagesArr.length ; i++)
+						{
+							checkbox_multi = "checkbox_tumblr_"+pagesArr[i];
+							console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = ' + document.getElementById(checkbox_multi).checked);
+							
+							if(document.getElementById(checkbox_multi).checked === true)
+							{
+								console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+								post_on_platform(checkbox_multi,message);
+							}
+						}
+					}
+					if (social_pages_included[key] == "facebook")
+					{
+						var pagesArr = fb_pages.split(';');
+						for (i = 1; i < pagesArr.length ; i++)
+						{//<input type="checkbox" id="checkbox_facebook_104962884545049">
+							checkbox_multi = "checkbox_facebook_"+pagesArr[i];
+							console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+							
+							if(document.getElementById(checkbox_multi).checked === true)
+							{
+								console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+								post_on_platform(checkbox_multi,message);
+							}
+						}
+					}
+				}
 			}
-		}
-		
-		//multi pages from fb/tu/li
-		// This platforms allow multi_pages for same user
-		if (social_pages_included[key] == "linkedin")
-		{
-			var pagesArr = li_pages.split(';');
-			for (i = 1; i < pagesArr.length ; i++)
-			{
-				checkbox_multi = "checkbox_linkedin_"+pagesArr[i];
-				console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
-				// post_on_platform(pagesArr[key],message);
-			}
-		}
-		if (social_pages_included[key] == "tumblr")
-		{
-			var pagesArr = tu_pages.split(';');
-			for (i = 1; i < pagesArr.length ; i++)
-			{
-				checkbox_multi = "checkbox_tumblr_"+pagesArr[i];
-				console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = ' + document.getElementById(checkbox_multi).checked);
-				// post_on_platform(pagesArr[key],message);
-			}
-		}
-		if (social_pages_included[key] == "facebook")
-		{
-			var pagesArr = fb_pages.split(';');
-			for (i = 1; i < pagesArr.length ; i++)
-			{//<input type="checkbox" id="checkbox_facebook_104962884545049">
-				checkbox_multi = "checkbox_facebook_"+pagesArr[i];
-				console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
-				// post_on_platform(pagesArr[key],message);
-			}
-		}
 	}
-	
 	//end
 	// window.close();
 }
@@ -668,17 +766,52 @@ function send_login_data( email, password , registered )
 async function post_on_platform(post_platform, message)
 {
 	
-	if(post_platform == "linkedin" || post_platform == "twitter" || post_platform == "tumblr")
+	if(post_platform.includes("linkedin") || post_platform.includes("twitter") || post_platform.includes("tumblr"))
 	{
 
 		if(message.data.post_text != "")//work for twitter . It should work for linkedin too
 		{ 
-			if(post_platform == "linkedin"){formData_li.append("text", message.data.post_text);};//text
-			if(post_platform == "tumblr"){formData_tu.append("text", message.data.post_text);};//text
-			if(post_platform == "twitter"){formData_tw.append("text", message.data.post_text);};//text
+			// if(post_platform.includes("linkedin") && formData_li.get("text") != message.data.post_text){formData_li.append("text", message.data.post_text);};//text
+			// if(post_platform.includes("tumblr") && formData_tu.get("text") != message.data.post_text){formData_tu.append("text", message.data.post_text);};//text
+			// if(post_platform.includes("twitter") && formData_tw.get("text") != message.data.post_text){formData_tw.append("text", message.data.post_text);};//text
+			if(post_platform.includes("linkedin"));//text
+			{
+				if(formData_li.get("text") == null)
+				{
+					formData_li.append("text", message.data.post_text);
+				}
+				else if (formData_li.get("text") != message.data.post_text)
+				{
+					formData_li.append("text", message.data.post_text);
+				}
+			}
+			if(post_platform.includes("tumblr"));//text
+			{
+				if(formData_tu.get("text") == null)
+				{
+					formData_tu.append("text", message.data.post_text);
+				}
+				else if (formData_tu.get("text") != message.data.post_text)
+				{
+					formData_tu.append("text", message.data.post_text);
+				}
+			}
+			if(post_platform.includes("twitter"));//text
+			{
+				if(formData_tw.get("text") == null)
+				{
+					formData_tw.append("text", message.data.post_text);
+				}
+				else if (formData_tw.get("text") != message.data.post_text)
+				{
+					formData_tw.append("text", message.data.post_text);
+				}
+			}
+			
+			
 			
 		}
-		if(message.data.post_imgs != "")//not working .. //linkedin -> twitter image is base64 raw data not url
+		if(message.data.post_imgs != "")
 		{
 			for (var i = 0; i < message.data.post_imgs.length; i++)
 			{
@@ -687,40 +820,165 @@ async function post_on_platform(post_platform, message)
 					console.log("Image with data...base64 instead of url -> tranform it in file");
 					var file = await base64datatoFile(message.data.post_imgs[i], 'a_'+i+'_'+post_platform+'.png');
 					console.log("Img "+i+" transformed with success in file");
-					if(post_platform == "linkedin"){formData_li.append("files[]", file);};//file
-					if(post_platform == "tumblr"){if(i==0){formData_tu.append("files[]", file);}};//file//Tumblr accept only a image
-					if(post_platform == "twitter"){formData_tw.append("files[]", file);};//file
-
-					
+					if( post_platform.includes("twitter"))
+					{
+						if (formData_tw.get("files[]") == null )
+						{
+							console.log("File form empty -> add file");
+							formData_tw.append("files[]", file);
+						}
+						else
+						{
+							var included = 0;
+							for (var value of formData_tw.values("files[]"))
+							{
+								if (value.size == file.size){included = 1;}
+							}
+							if (!included)
+							{
+								console.log("File not included -> add file");
+								formData_tw.append("files[]", file);
+							}
+						}
+					}
+					if(post_platform.includes("linkedin"))
+					{
+						if (formData_li.get("files[]") == null )
+						{
+							console.log("File form empty -> add file");
+							formData_li.append("files[]", file);
+						}
+						else
+						{
+							var included = 0;
+							for (var value of formData_li.values("files[]"))
+							{
+								if (value.size == file.size){included = 1;}
+							}
+							if (!included)
+							{
+								console.log("File not included -> add file");
+								formData_li.append("files[]", file);
+							}
+						}
+					}
+					if(post_platform.includes("tumblr"))
+					{
+						if (formData_tu.get("files[]") == null )
+						{
+							console.log("File form empty -> add file");
+							formData_tu.append("files[]", file);
+						}
+						else
+						{
+							var included = 0;
+							for (var value of formData_tu.values("files[]"))
+							{
+								if (value.size == file.size){included = 1;}
+							}
+							if (!included)
+							{
+								console.log("File not included -> add file");
+								formData_tu.append("files[]", file);
+							}
+						}
+					}
+					// if(post_platform.includes("linkedin")){formData_li.append("files[]", file);};//file
+					// if(post_platform.includes("tumblr")){if(i==0){formData_tu.append("files[]", file);}};//file//Tumblr accept only a image
+					// if(post_platform.includes("twitter")){formData_tw.append("files[]", file);};//file
 				}
 				else
 				{
 					console.log("Image with  normal url");
-					if(post_platform == "linkedin"){formData_li.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
-					if(post_platform == "tumblr"){formData_tu.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
-					if(post_platform == "twitter"){formData_tw.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
+					if(post_platform.includes("linkedin"))
+					{
+						if (formData_li.get("files_url[]") == null )
+						{
+							console.log("File url form empty -> add url");
+							formData_li.append("files_url[]", encodeURI(message.data.post_imgs[i]));
+						}
+						else
+						{
+							var included = 0;
+							for (var value of formData_li.values("files_url[]"))
+							{
+								if (value == encodeURI(message.data.post_imgs[i])){included = 1;}
+							}
+							if (!included)
+							{
+								console.log("File url not included -> add url");
+								formData_li.append("files_url[]", encodeURI(message.data.post_imgs[i]));
+							}
+						}
+					}
+					if(post_platform.includes("tumblr"))
+					{
+						if (formData_tu.get("files_url[]") == null )
+						{
+							console.log("File url form empty -> add url");
+							formData_tu.append("files_url[]", encodeURI(message.data.post_imgs[i]));
+						}
+						else
+						{
+							var included = 0;
+							for (var value of formData_tu.values("files_url[]"))
+							{
+								if (value == encodeURI(message.data.post_imgs[i])){included = 1;}
+							}
+							if (!included)
+							{
+								console.log("File url not included -> add url");
+								formData_tu.append("files_url[]", encodeURI(message.data.post_imgs[i]));
+							}
+						}
+					}
+					if(post_platform.includes("twitter"))
+					{
+						if (formData_tw.get("files_url[]") == null )
+						{
+							console.log("File url form empty -> add url");
+							formData_tw.append("files_url[]", encodeURI(message.data.post_imgs[i]));
+						}
+						else
+						{
+							var included = 0;
+							for (var value of formData_tw.values("files_url[]"))
+							{
+								if (value == encodeURI(message.data.post_imgs[i])){included = 1;}
+							}
+							if (!included)
+							{
+								console.log("File url not included -> add url");
+								formData_tw.append("files_url[]", encodeURI(message.data.post_imgs[i]));
+							}
+						}
+					}
+					
+					// if(post_platform.includes("linkedin")){formData_li.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
+					// if(post_platform.includes("tumblr")){formData_tu.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
+					// if(post_platform.includes("twitter")){formData_tw.append("files_url[]", encodeURI(message.data.post_imgs[i]));};//url
 				}
 			}
 
 		}
-		if(post_platform == "linkedin"){post_red_team(post_platform, formData_li);}; 
-		if(post_platform == "tumblr"){post_red_team(post_platform, formData_tu);}; 
-		if(post_platform == "twitter"){post_red_team(post_platform, formData_tw);}; 
+		if(post_platform.includes("linkedin")){post_red_team(post_platform, formData_li);}; 
+		if(post_platform.includes("tumblr")){post_red_team(post_platform, formData_tu);}; 
+		if(post_platform.includes("twitter")){post_red_team(post_platform, formData_tw);}; 
 		
 		
 	}
 	
 	
-	if(post_platform == "facebook" || post_platform == "flickr")
+	if(post_platform.includes("facebook") || post_platform.includes("flickr"))
 	{
 
 		
-		if (post_platform == "facebook")
+		if (post_platform.includes("facebook") && !string_post_fb.includes("FBFINAL\/REST"))
 		{
 			string_post_fb += "FBFINAL/REST.php?do=";
 			string_post += "FBFINAL/REST.php?do=";
 		}
-		if((post_platform == "flickr"))
+		if(post_platform.includes("flickr") && !string_post_fl.includes("DPZ\/REST"))
 		{
 			string_post_fl += "DPZ/REST.php?do=";
 			string_post += "DPZ/REST.php?do=";
@@ -733,15 +991,21 @@ async function post_on_platform(post_platform, message)
 		console.log("fb string="+string_post_fb +" fl string="+string_post_fl);
 		if(message.data.post_imgs != "")//img +- txt
 		{
-			if (post_platform == "facebook")
+			if (post_platform.includes("facebook"))
 			{
 				if(message.data.post_imgs.length >= 2)
 				{
-					string_post_fb += "MultipleImage";
+					if(!string_post_fb.includes("do=MultipleImage"))
+					{
+						string_post_fb += "MultipleImage";
+					}
 				}
 				else
 				{
-					string_post_fb += "PostImage";
+					if(!string_post_fb.includes("do=PostImage"))
+					{
+						string_post_fb += "PostImage";
+					}
 				}
 			}
 			if((post_platform == "flickr"))
@@ -758,19 +1022,29 @@ async function post_on_platform(post_platform, message)
 				console.log("Image with data...base64 instead of url ->TO DO:tranform it in url somehow(imgur)");
 				parallelizeTrasformBase64dataInUrl(message.data.post_imgs, loopFnTransformInImgur, function(){
 					console.log('Done transforming all base64datas to urls');
-					if (post_platform == "facebook")
+					if (post_platform.includes("facebook"))
 					{
-						string_post_fb += "&image=" + encodeURIComponent(imgur_urls[0]);
+						if (!string_post_fb.includes(encodeURIComponent(imgur_urls[0])))
+						{
+							string_post_fb += "&image=" + encodeURIComponent(imgur_urls[0]);
+						}
+						
 						if(imgur_urls.length >= 2)
 						{
 							for (var i = 1; i < imgur_urls.length; i++)
 							{
-								string_post_fb += "%2B" + encodeURIComponent(imgur_urls[i]);
+								if (!string_post_fb.includes(encodeURIComponent(imgur_urls[i])))
+								{
+									string_post_fb += "%2B" + encodeURIComponent(imgur_urls[i]);
+								}
 							}
 						}
 						if(message.data.post_text != "")
 						{
-							string_post_fb += "&mesaj="+encodeURIComponent(message.data.post_text);
+							if (!string_post_fb.includes(encodeURIComponent(message.data.post_text)))
+							{
+								string_post_fb += "&mesaj="+encodeURIComponent(message.data.post_text);
+							}
 						}
 						else
 						{
@@ -778,12 +1052,18 @@ async function post_on_platform(post_platform, message)
 						}
 						if(message.data.post_imgs.length >= 2)
 						{
-							string_post_fb += "&jwt="+token+"&submit=MultipleImage";
+							if (!string_post_fb.includes("&submit=MultipleImage"))
+							{
+								string_post_fb += "&jwt="+token+"&submit=MultipleImage";
+							}
 						}
 						else
 						{
 							// string_post_fb += "&fbid="+userid+"&submit=Image";
-							string_post_fb += "&jwt="+token+"&submit=Image";
+							if (!string_post_fb.includes("&submit=Image"))
+							{
+								string_post_fb += "&jwt="+token+"&submit=Image";
+							}
 						}
 						
 					}
@@ -810,12 +1090,12 @@ async function post_on_platform(post_platform, message)
 						string_post_fl += "&token=" + token + "&submit=PostImage";
 					}
 					
-					if (post_platform == "facebook")
+					if(post_platform.includes("facebook"))
 					{
 						console.log("Post fb string= "+string_post_fb);
 						post_yellow_team(string_post_fb , post_platform);
 					}
-					if((post_platform == "flickr"))
+					if(post_platform.includes("flickr"))
 					{
 						console.log("Post fl string= "+string_post_fl);
 						post_yellow_team(string_post_fl , post_platform);
@@ -885,20 +1165,38 @@ async function post_on_platform(post_platform, message)
 			{//We have imgs with url
 				console.log("Normal url . Other case(not blob or base64) :"+ message.data.post_imgs[0]);
 				
-				if (post_platform == "facebook")
+				if (post_platform.includes("facebook"))
 				{
-					string_post_fb += "&image="+encodeURIComponent(message.data.post_imgs[0]);
-
+					if (!string_post_fb.includes(encodeURIComponent(message.data.post_imgs[0])))
+					{
+						string_post_fb += "&image="+encodeURIComponent(message.data.post_imgs[0]);
+					}
+					if(message.data.post_imgs.length >= 2)
+					{
+						for (var i = 1; i < message.data.post_imgs.length; i++)
+						{
+							if (!string_post_fb.includes(encodeURIComponent(message.data.post_imgs[i])))
+							{
+								string_post_fb += "%2B" + encodeURIComponent(message.data.post_imgs[i]);
+							}
+						}
+					}
 					if(message.data.post_text != "")
 					{ 
-						string_post_fb += "&mesaj="+encodeURIComponent(message.data.post_text);
+						if (!string_post_fb.includes(encodeURIComponent(message.data.post_text)))
+						{
+							string_post_fb += "&mesaj="+encodeURIComponent(message.data.post_text);
+						}
 					}
 					else
 					{
 						string_post_fb += "&mesaj= ";
 					}
 					// string_post_fb += "&fbid="+userid+"&submit=Image";
-					string_post_fb += "&jwt="+token+"&submit=Image";
+					if (!string_post_fb.includes("&submit=Image"))
+					{
+						string_post_fb += "&jwt="+token+"&submit=Image";
+					}
 					post_yellow_team(string_post_fb , post_platform);
 				}
 				else if((post_platform == "flickr"))
@@ -957,8 +1255,38 @@ function post_red_team(post_platform, formData)
 	// 503{"error":"Internal server error."}
 	
 	console.log("We start to make post request for "+post_platform);
+	
+	for (var value of formData.values())
+	{
+	   console.log("Red formdata value: " + value);
+	}
+	
+	if(post_platform.includes("tumblr") && default_page_tu == 1 && post_platform.includes("calmiselena.tumblr.com"))
+	{
+		console.log("Default page already posted -> not post again");
+		return 1;
+	}
+	if(post_platform.includes("linkedin") && default_page_li == 1 && post_platform.includes("urn:li:organization:53085711"))
+	{
+		console.log("Default page already posted -> not post again");
+		return 1;
+	}
+	if(post_platform == "tumblr"){default_page_tu = 1}
+	if(post_platform == "linkedin"){default_page_li = 1}
+	
+	
+	var url = "http://sma-a4.herokuapp.com/"+post_platform+"/post";
+	if(post_platform.includes("checkbox_"))
+	{
+		var s = post_platform;
+		var s = s.substring(s.indexOf('_')+1,s.length);
+		var post_id = s.substring(s.indexOf('_')+1,s.length);
+		url +="?page="+ page_id;
+	}
+	console.log("We have to request url ": + url);
+	return 1;
 	var xhttp = new XMLHttpRequest();//build a HTML request for signup
-	xhttp.open("POST", "http://sma-a4.herokuapp.com/"+post_platform+"/post", true);
+	xhttp.open("POST", url, true);
 	xhttp.withCredentials = true;
 	xhttp.send(formData);
 	
@@ -993,10 +1321,24 @@ function post_red_team(post_platform, formData)
 function post_yellow_team(string_post , post_platform)
 {
 	console.log("We have to request this :"+ string_post)
+	
+	
+
 	if(string_post.includes("submit") && string_post.includes("do=") && !string_post.includes("error"))
 	{
 		var xhttp = new XMLHttpRequest();//build a HTML request for signup
-		xhttp.open("GET", "https://web-rfnl5hmkocvsi.azurewebsites.net/" + string_post, true);
+		var url = "https://web-rfnl5hmkocvsi.azurewebsites.net/" + string_post;
+		if(post_platform.includes("checkbox_"))
+		{
+			var s = post_platform;
+			var s = s.substring(s.indexOf('_')+1,s.length);
+			var post_id = s.substring(s.indexOf('_')+1,s.length);
+			url +="&paginaId="+ page_id;//have to test if is working 
+			
+		}
+		console.log("We have to request url ": + url);
+		return 1;
+		xhttp.open("GET", url, true);
 		xhttp.send();
 		
 		xhttp.onload = () => {
@@ -1406,7 +1748,7 @@ function generete_sharemultiple_on_html(multi_pages,platfom)
 
 
 
-//TO DO : Allow multiple linkedin/facebook/tumblr pages. We have to make select on wich of page to post. 
+//TO DO : Allow multiple linkedin/facebook/tumblr pages. We have to make select on wich of page to post.  - almost done - not tested 
 //TO DO : Integreate jwt token - done(flick/fb)
 //TO DO : Paralel blob/base64data transform in files/urls - done
 //TO DO : Flickr multiple images - done
