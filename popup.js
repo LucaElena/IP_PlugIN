@@ -10,11 +10,17 @@ img_tumblr = '<object class="social_icon" type="image/svg+xml" data="tumblr.svg 
 img_linkedin = '<object class="social_icon" type="image/svg+xml" data="linkedin.svg "></object>';
 img_facebook = '<object class="social_icon" type="image/svg+xml" data="facebook.svg "></object>';
 
-logged = false;
-email = "not_logged";
-password = "";
-userid = "";
-url = "not_defined"
+var logged = false;
+var email = "not_logged";
+var password = "";
+var userid = "";
+var url = "not_defined";
+var fb_pages = "";
+var li_pages = "";
+var tu_pages = "";
+var fb_pages_names = "";
+var li_pages_names = "";
+var tu_pages_names = "";
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 
@@ -30,6 +36,7 @@ var formData_tw;
 var formData_tu;
 
 let imgur_urls = [];
+let names = [];
 let base64data_urls = [];
 	// console.log('We deleted stored user data');
 	// chrome.storage.local.set({'email': ""});
@@ -40,6 +47,9 @@ let base64data_urls = [];
 	// chrome.storage.local.set({'fb_pages': ""});
 	// chrome.storage.local.set({'li_pages': ""});
 	// chrome.storage.local.set({'tu_pages': ""});
+	// chrome.storage.local.set({'tu_pages_names': ""});
+	// chrome.storage.local.set({'fb_pages_names': ""});
+	// chrome.storage.local.set({'li_pages_names': ""});
 
 
 
@@ -63,7 +73,7 @@ function gotMessage(message, sender , sendResponse)
 }
 
 
-function generete_popup_html( url)
+function generete_popup_html(url)
 {
 	current_social_page = "page not included";
 	current_img = "";
@@ -87,7 +97,7 @@ function generete_popup_html( url)
 
 	
 	
-	chrome.storage.local.get(['logged', 'email' , 'password', 'userId', 'token', 'fb_pages', 'li_pages', 'tu_pages'], function(data){
+	chrome.storage.local.get(['logged', 'email' , 'password', 'userId', 'token', 'fb_pages', 'li_pages', 'tu_pages' , 'fb_pages_names' , 'li_pages_names' , 'tu_pages_names'], function(data){
 		logged = data.logged;
 		email = data.email;
 		password = data.password;
@@ -96,8 +106,11 @@ function generete_popup_html( url)
 		fb_pages = data.fb_pages;
 		li_pages = data.li_pages;
 		tu_pages = data.tu_pages;
+		fb_pages_names = data.fb_pages_names;
+		li_pages_names = data.li_pages_names;
+		tu_pages_names = data.tu_pages_names;
 		
-		console.log('We currently have saved data logged=' + logged + " email=" + email + " userid=" + userid + " token=" + token + " fb_pages=" + fb_pages + " li_pages=" + li_pages + " tu_pages=" + tu_pages);
+		console.log('We currently have saved data logged=' + logged + " email=" + email + " userid=" + userid + " token=" + token + " fb_pages=" + fb_pages + " li_pages=" + li_pages + " tu_pages=" + tu_pages + " fb_pages_names=" + fb_pages_names + " li_pages_names=" + li_pages_names + " tu_pages_names=" + tu_pages_names);
 
 		if(logged  == false)
 		{
@@ -131,17 +144,17 @@ function generete_popup_html( url)
 				document.getElementById("share_on_div3").innerHTML += '<div '+
 				'id="list_linkedin" class="dropdown-check-list" tabindex="100">'+
 					'<span class="anchor_li">Linkedin</span>'+
-					'<ul id="items_linkedin" class="items_li">'+generete_sharemultiple_on_html(li_pages,"linkedin")+
+					'<ul id="items_linkedin" class="items_li">'+generete_sharemultiple_on_html(li_pages,li_pages_names,"linkedin")+
 					'</ul>'+
 				'</div>';
 				document.getElementById("share_on_div4").innerHTML += '<div id="list_tumblr" class="dropdown-check-list" tabindex="100">'+
 					'<span class="anchor_tu">Tumbr</span>'+
-					'<ul id="items_tumblr" class="items_tu">'+generete_sharemultiple_on_html(tu_pages,"tumblr")+
+					'<ul id="items_tumblr" class="items_tu">'+generete_sharemultiple_on_html(tu_pages,tu_pages_names,"tumblr")+
 					'</ul>'+
 				'</div>';
 				document.getElementById("share_on_div5").innerHTML += '<div id="list_facebook" class="dropdown-check-list" tabindex="100">'+
 					'<span class="anchor_fb">Facebook</span>'+
-					'<ul id="items_facebook" class="items_fb">'+generete_sharemultiple_on_html(fb_pages,"facebook")+
+					'<ul id="items_facebook" class="items_fb">'+generete_sharemultiple_on_html(fb_pages,fb_pages_names,"facebook")+
 					'</ul>'+
 				'</div>';
 				
@@ -493,6 +506,75 @@ function postit_fct(current_platorm,message)
 				}
 			}
 	}
+	else
+	{//only text
+		if(message.data.post_text != "")
+		{ 
+			console.log('Txt data we only have to post =' + message.data.post_text);
+			for (key in social_pages_included) 
+			{
+				//default page
+				if (social_pages_included[key] != current_social_page)
+				{
+					checkbox_default = "checkbox_"+social_pages_included[key];
+					console.log('Selected default page from platform ' + social_pages_included[key] + ' value = ' + document.getElementById(checkbox_default).checked);
+					if(document.getElementById(checkbox_default).checked === true)
+					{
+						console.log('Start post on '+social_pages_included[key]);
+						post_on_platform(social_pages_included[key],message);
+					}
+				}
+				
+				//multi pages from fb/tu/li
+				// This platforms allow multi_pages for same user
+				if (social_pages_included[key] == "linkedin")
+				{
+					var pagesArr = li_pages.split(';');
+					for (i = 1; i < pagesArr.length ; i++)
+					{
+						checkbox_multi = "checkbox_linkedin_"+pagesArr[i];
+						console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+						
+						if(document.getElementById(checkbox_multi).checked === true)
+						{
+							console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+							post_on_platform(checkbox_multi,message);
+						}
+					}
+				}
+				if (social_pages_included[key] == "tumblr")
+				{
+					var pagesArr = tu_pages.split(';');
+					for (i = 1; i < pagesArr.length ; i++)
+					{
+						checkbox_multi = "checkbox_tumblr_"+pagesArr[i];
+						console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = ' + document.getElementById(checkbox_multi).checked);
+						
+						if(document.getElementById(checkbox_multi).checked === true)
+						{
+							console.log('Start post on '+social_pages_included[key]+' '+social_pages_included[key]);
+							post_on_platform(checkbox_multi,message);
+						}
+					}
+				}
+				if (social_pages_included[key] == "facebook")
+				{
+					var pagesArr = fb_pages.split(';');
+					for (i = 1; i < pagesArr.length ; i++)
+					{//<input type="checkbox" id="checkbox_facebook_104962884545049">
+						checkbox_multi = "checkbox_facebook_"+pagesArr[i];
+						console.log('Selected multi page '+ pagesArr[i] +' from platform '+social_pages_included[key]+' value = '+ document.getElementById(checkbox_multi).checked);
+						
+						if(document.getElementById(checkbox_multi).checked === true)
+						{
+							console.log('Start post on '+social_pages_included[key]+' '+pagesArr[i]);
+							post_on_platform(checkbox_multi,message);
+						}
+					}
+				}
+			}
+		}
+	}
 	//end
 	// window.close();
 }
@@ -510,6 +592,9 @@ function logout_fct()
 	chrome.storage.local.set({'fb_pages': ""});//Here we could have multiple pages
 	chrome.storage.local.set({'li_pages': ""});//Here we could have multiple pages
 	chrome.storage.local.set({'tu_pages': ""});//Here we could have multiple pages
+	chrome.storage.local.set({'tu_pages_names': ""});
+	chrome.storage.local.set({'fb_pages_names': ""});
+	chrome.storage.local.set({'li_pages_names': ""});
 	
 	clear_html_containers();
 
@@ -571,7 +656,7 @@ function send_register_data()
 		{
 			document.getElementById("authorize_div").innerHTML = ' '+
 								'<p> Register Error : '+xhttp.response+'</p>';
-			console.error('Error!'+xhttp.response);
+			console.log('Error!'+xhttp.response);
 		}
 	};
 }
@@ -636,7 +721,7 @@ function send_login_data( email, password , registered )
 		xhttp2.open("GET", "http://sma-a4.herokuapp.com/token", true);
 		xhttp2.send();
 		
-		xhttp2.onload = () => {
+		xhttp2.onload = async () => {
 			// process response
 			if (xhttp2.status == 200)//TODO: Check errors and body response message
 			{
@@ -648,10 +733,13 @@ function send_login_data( email, password , registered )
 				chrome.storage.local.set({'userId': decoded.user_id});
 				userid=decoded.user_id;
 				
-				
+				await sleep(Math.floor(Math.random() * (300))+100);//we get error because token is too new or something like this.
 				var xhttp5 = new XMLHttpRequest();
 				xhttp5.open("GET", "http://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getPages&jwt="+token, true);
 				xhttp5.setRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+				// xhttp5.setRequestHeader("Upgrade-Insecure-Requests", "1");
+				// await sleep(Math.floor(Math.random() * (3000))+1000);
+				await sleep(Math.floor(Math.random() * (300))+100);
 				xhttp5.send();
 				
 				xhttp5.onload = () => {
@@ -662,17 +750,37 @@ function send_login_data( email, password , registered )
 						let pages = JSON.parse(xhttp5.response).PAGE_IDS
 						console.log("We get the facebook pages also: "+ pages);
 						fb_pages = "";
+						fb_pages_names = "";
 						for (var i = 0; i < pages.length; i++)
 						{
 							fb_pages += ";"+pages[i];
+							// fb_pages_names += ";"+pages[i];
 						}
 						chrome.storage.local.set({'fb_pages': fb_pages});
+						// chrome.storage.local.set({'fb_pages_names': fb_pages_names});
+						
+						parallelizeGetNamesFromIds(pages, loopFn, function(){
+							console.log('Done transforming fb ids in names');
+							for (var i = 0 ; i < names.length ; i++ )
+							{
+								console.log(names[i]);
+								fb_pages_names += ";"+names[i];
+								
+							}
+							chrome.storage.local.set({'fb_pages_names': fb_pages_names});
+						});
+						
+						
 					}
 					else
 					{
 						document.getElementById("authorize_div").innerHTML = ' '+
 												'<p> Get Facebook get pages Error : '+xhttp5.status+xhttp5.response+'</p>';
-							console.error('Error!');
+						console.log('Error: Get Facebook get pages Error : '+xhttp5.status+xhttp5.response);
+						
+						chrome.storage.local.set({'fb_pages': ";104962884545049;107670777618045"});//insert the old hardcoded one
+						chrome.storage.local.set({'fb_pages_names': ";Test Page;Test Page2"});//insert the old hardcoded one
+						//try again :
 					}
 				};
 						
@@ -681,7 +789,7 @@ function send_login_data( email, password , registered )
 			{
 				document.getElementById("authorize_div").innerHTML = ' '+
 										'<p> Token Error : '+xhttp2.status+xhttp2.response+'</p>';
-					console.error('Error!');
+				console.log('Error: Token Error'+xhttp2.status+xhttp2.response);
 			}
 		};
 		
@@ -695,19 +803,23 @@ function send_login_data( email, password , registered )
 			{
 				
 				let pages = JSON.parse(xhttp3.response).pages
+				let pages_names = JSON.parse(xhttp3.response).pages_names
 				console.log("We get the linkedin pages also: "+ pages);
 				li_pages = "";
-				for (var i = 0; i < pages.length; i++)
+				li_pages_names = "";
+				for (key in pages_names)
 				{
-					li_pages += ";"+pages[i];
+					li_pages += ";"+key;
+					li_pages_names += ";"+pages_names[key];
 				}
 				chrome.storage.local.set({'li_pages': li_pages});
+				chrome.storage.local.set({'li_pages_names': li_pages_names});
 			}
 			else
 			{
 				document.getElementById("authorize_div").innerHTML = ' '+
 										'<p> Get Linkedin get pages Error : '+xhttp3.status+xhttp3.response+'</p>';
-					console.error('Error!');
+				console.log('Error: Get Linkedin get pages Error : '+xhttp3.status+xhttp3.response);
 			}
 		};
 		
@@ -723,17 +835,21 @@ function send_login_data( email, password , registered )
 				let pages = JSON.parse(xhttp4.response).pages
 				console.log("We get the tumblr pages also: "+ pages);
 				tu_pages = "";
+				tu_pages_names = "";
 				for (var i = 0; i < pages.length; i++)
 				{
 					tu_pages += ";"+pages[i];
+					tu_pages_names += ";"+pages[i].substring(0,pages[i].length-11);
 				}
 				chrome.storage.local.set({'tu_pages': tu_pages});
+				chrome.storage.local.set({'tu_pages_names': tu_pages_names});
+				
 			}
 			else
 			{
 				document.getElementById("authorize_div").innerHTML = ' '+
 										'<p> Get Tumblr get pages Error : '+xhttp4.status+xhttp4.response+'</p>';
-					console.error('Error!');
+				console.log('Error : Get Tumblr get pages Error : '+xhttp4.status+xhttp4.response);
 			}
 		};
 		
@@ -757,7 +873,7 @@ function send_login_data( email, password , registered )
 		{
 			document.getElementById("authorize_div").innerHTML = ' '+
 								'<p> Login Error : '+xhttp.response+'</p>';
-			console.error('Error!');
+			console.log('Error : Login Error : '+xhttp.response);
 		}
 	}
 };
@@ -1225,26 +1341,35 @@ async function post_on_platform(post_platform, message)
 		}
 		else
 		{//only txt 
-			string_post_fl += "PostMessage";
+			
+			console.log("Start to build only text URI:"+ string_post_fb);
 			if(message.data.post_text != "")
 			{ 
-				if (string_post_fl == "facebook")
+				
+				if (post_platform.includes("facebook"))
 				{
-					// string_post_fl += "&messenger="+encodeURIComponent(message.data.post_text)+"&fbid="+userid+"&submit=Message";//bug from yellow team-> only some user work
-					string_post_fl += "&messenger="+encodeURIComponent(message.data.post_text)+"&jwt="+token+"&submit=Message";//bug from yellow team-> only some user work
-					post_yellow_team(string_post_fl , post_platform);
+					if(!string_post_fb.includes("PostMessage"))
+					{
+						string_post_fb += "PostMessage";
+					}
+					if(!string_post_fb.includes("&submit=Message"))
+					{
+						string_post_fb += "&messenger="+encodeURIComponent(message.data.post_text)+"&jwt="+token+"&submit=Message";
+					}
+					post_yellow_team(string_post_fb , post_platform);
 				}
 				else if((post_platform == "flickr"))
 				{// NOT IMPLEMENTED 
 					console.log("We are not allowed to post only text on flickr")
-					// string_post += "&messenger="+message.data.post_text+"&userId=" + userid + "&submit=PostImage";
+					document.getElementById("authorize_div").innerHTML += ' '+
+								'<p> Not allowed to post only text on flickr </p>';
 				}
 			}
 		}
 	}
 }
 
-function post_red_team(post_platform, formData)
+async function post_red_team(post_platform, formData)
 {
 	// 200["nothing happened"]-> for tumblr: maybe is not implemented yet?
 	// 201{"message":"Posted successfully."}
@@ -1274,17 +1399,27 @@ function post_red_team(post_platform, formData)
 	if(post_platform == "tumblr"){default_page_tu = 1}
 	if(post_platform == "linkedin"){default_page_li = 1}
 	
+	// await sleep(Math.floor(Math.random() * (2000))+1000);//We got errors if we post to fast; 
+	await sleep(Math.floor(Math.random() * (300))+100);
+	var url = "http://sma-a4.herokuapp.com/";
 	
-	var url = "http://sma-a4.herokuapp.com/"+post_platform+"/post";
 	if(post_platform.includes("checkbox_"))
 	{
 		var s = post_platform;
 		var s = s.substring(s.indexOf('_')+1,s.length);
-		var post_id = s.substring(s.indexOf('_')+1,s.length);
+		var platfom = s.substring(0,s.indexOf('_'));
+		var page_id = s.substring(s.indexOf('_')+1,s.length);
+		post_platform = platfom + "_" + page_id;
+		url += platfom+"/post";
 		url +="?page="+ page_id;
 	}
-	console.log("We have to request url ": + url);
-	return 1;
+	else
+	{
+		url += post_platform+"/post";
+	}
+	
+	console.log('We have to request url :' + url);
+	// return 1;
 	var xhttp = new XMLHttpRequest();//build a HTML request for signup
 	xhttp.open("POST", url, true);
 	xhttp.withCredentials = true;
@@ -1310,9 +1445,10 @@ function post_red_team(post_platform, formData)
 			}
 			else
 			{
-				console.error('Error!'+xhttp.status);
+				
 				document.getElementById("authorize_div").innerHTML += ' '+
-							'<p> Post error for ' + post_platform + " code="+ xhttp.status+ '  </p>';
+							'<p> Post error for ' + post_platform + ' code='+ xhttp.status+ '  </p>';
+				console.log('Error Post error for ' + post_platform + ' code='+xhttp.status);
 				
 			}
 		}
@@ -1323,7 +1459,14 @@ function post_yellow_team(string_post , post_platform)
 	console.log("We have to request this :"+ string_post)
 	
 	
-
+	if(post_platform.includes("facebook") && default_page_fb == 1 && post_platform.includes("104962884545049"))//This is not correct: hardcoded 
+	{
+		console.log("Default page already posted -> not post again");
+		return 1;
+	}
+	if(post_platform == "facebook"){default_page_fb = 1}
+	
+	
 	if(string_post.includes("submit") && string_post.includes("do=") && !string_post.includes("error"))
 	{
 		var xhttp = new XMLHttpRequest();//build a HTML request for signup
@@ -1332,12 +1475,14 @@ function post_yellow_team(string_post , post_platform)
 		{
 			var s = post_platform;
 			var s = s.substring(s.indexOf('_')+1,s.length);
-			var post_id = s.substring(s.indexOf('_')+1,s.length);
+			var platfom = s.substring(0,s.indexOf('_'));
+			var page_id = s.substring(s.indexOf('_')+1,s.length);
+			post_platform = platfom + "_" + page_id;
 			url +="&paginaId="+ page_id;//have to test if is working 
 			
 		}
-		console.log("We have to request url ": + url);
-		return 1;
+		console.log("We have to request url :" + url);
+		// return 1;
 		xhttp.open("GET", url, true);
 		xhttp.send();
 		
@@ -1354,14 +1499,14 @@ function post_yellow_team(string_post , post_platform)
 				}
 				else
 				{
-					console.error('Post error for ' + post_platform + " code="+ xhttp.status);
+					console.log('Post error for ' + post_platform + " code="+ xhttp.status);
 					document.getElementById("authorize_div").innerHTML += ' '+
 								'<p> Post error for ' + post_platform + " code="+ xhttp.status+ '  </p>';
 				}
 			}
 			else 
 			{
-					console.error('Post error for ' + post_platform + " code="+ xhttp.status);
+					console.log('Post error for ' + post_platform + " code="+ xhttp.status);
 					document.getElementById("authorize_div").innerHTML += ' '+
 								'<p> Post error for ' + post_platform + " code="+ xhttp.status+ '  </p>';
 			}
@@ -1608,7 +1753,8 @@ async function myFuncTransformInImgurUrl(value, callback)
 {
 	var image_file = await base64datatoFile(value, 'file_'+ Math.floor(Math.random() * (100 - 0 + 1)) +'.png');
 	console.log("Img base64 transformed with success in file");
-	await sleep(Math.floor(Math.random() * (100 - 0 + 1)));//We got blocked by imgur if we upload to fast; 
+	// await sleep(Math.floor(Math.random() * (2000))+1000);//We got blocked by imgur if we upload to fast; 
+	await sleep(Math.floor(Math.random() * (300))+100);//We got blocked by imgur if we upload to fast; 
 	imgur_api_url = 'https://api.imgur.com/3/image';
 	var xhttp = new XMLHttpRequest();
 	xhttp.open("POST", imgur_api_url, true );
@@ -1634,8 +1780,8 @@ async function myFuncTransformInImgurUrl(value, callback)
 		else 
 		{
 
-			console.error('Imgur error status :'+xhttp.status);
-			console.error('Imgur error response :'+xhttp.response);
+			console.log('Imgur error status :'+xhttp.status);
+			console.log('Imgur error response :'+xhttp.response);
 			imgur_url =  "error";
 			imgur_urls.push(imgur_url);
 			callback(imgur_url);
@@ -1695,7 +1841,7 @@ async function transform_file_in_imgur_url(image_file, string_post_fb, string_po
 		else 
 		{
 
-			console.error('Error!'+xhttp.status);
+			console.log('Error!'+xhttp.status);
 			imgur_url =  "error";
 			callback(imgur_url, string_post_fb, string_post_fl);
 			
@@ -1731,13 +1877,78 @@ async function blob_to_data(bloburl)
 	return blobAsDataUrl;
 }
 
-function generete_sharemultiple_on_html(multi_pages,platfom)
+
+
+
+
+function parallelizeGetNamesFromIds(ids_list, fn, done)
+{
+	var total = ids_list.length,
+	doneTask = function() {
+	  if (--total === 0) {
+		done();
+	  }
+	};
+
+	ids_list.forEach(function(value) {
+	  fn(doneTask, value);
+	});
+}
+
+function loopFn(doneTask, value)
+{
+	myFuncTransformIdInName(value, doneTask);
+}
+
+async function myFuncTransformIdInName(value, callback)
+{
+	
+	console.log("Get name for id = "+ value);
+
+	var url = 'https://web-rfnl5hmkocvsi.azurewebsites.net/FBFINAL/REST.php?do=getPageName&jwt='+token+'&paginaId='+value;
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET", url, true);
+	<!-- xhttp.setRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"); -->
+	// xhttp5.setRequestHeader("Upgrade-Insecure-Requests", "1");
+	<!-- xhttp sleep(Math.floor(Math.random() * (3000))+1000); -->
+	xhttp.send();
+	
+	xhttp.onload = () => {
+		// process response
+		if (xhttp.status == 200)//TODO: Check errors and body response message
+		{
+			
+			let name = JSON.parse(xhttp.response).NAME;
+			console.log("We get the page "+value+" facebook name: "+ name);
+			names.push(name);
+			callback(names);
+		}
+		else
+		{
+			document.getElementById("authorize_div").innerHTML = ' '+
+									'<p> Get Facebook get name Error : '+xhttp.status+xhttp.response+'</p>';
+			console.log('Error: Get Facebook get name Error : '+xhttp.status+xhttp.response);
+			
+			<!-- chrome.storage.local.set({'fb_pages': ";104962884545049;107670777618045"});//insert the old hardcoded one -->
+			<!-- chrome.storage.local.set({'fb_pages_names': ";Test Page;Test Page2"});//insert the old hardcoded one -->
+			//try again :
+			names.push("error_name");
+			callback(names);
+		}
+	
+	};
+	
+}
+
+
+function generete_sharemultiple_on_html(multi_pages,multi_pages_names,platfom)
 {
 	var multi_pagesArr = multi_pages.split(';');
+	var multi_pagesArrName = multi_pages_names.split(';');
 	var input_string = "";
 	for (var i = 1; i < multi_pagesArr.length; i++)
 	{
-		input_string += '<li><input type="checkbox" id="checkbox_'+platfom+'_'+multi_pagesArr[i]+'"/>'+ multi_pagesArr[i]+'</li>'
+		input_string += '<li><input type="checkbox" id="checkbox_'+platfom+'_'+multi_pagesArr[i]+'"/>'+ multi_pagesArrName[i]+'</li>'
 	}
 	return input_string;
 }
